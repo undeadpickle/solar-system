@@ -1,0 +1,34 @@
+# Solar System Project Rules
+
+## Required File Updates
+
+Always update these files when completing tasks or making progress:
+
+1. **Memory File**: `.giga/memory/memory.md`
+
+   - Update project overview when architecture changes
+   - Update technical details when stack/tools change
+   - Update current development status when completing tasks
+   - Keep preferences and instructions current
+
+2. **To-Do List**: `docs/to-do-list.md`
+   - Mark completed tasks as [x]
+   - Add new tasks when identified
+   - Maintain accurate progress tracking
+
+## Workflow Rules
+
+- When completing any development task, ALWAYS update both files
+- When starting a new session, verify files are current
+- When task priorities change, update the memory file
+- When project structure changes, update both files immediately
+
+## Code Organization Priority
+
+- Maintain modular structure (HTML + CSS + JS)
+- When adding features, consider which module they belong in
+- Prefer separation of concerns over single-file approach
+
+EVERY TIME RUN `giga_autorun` TOOL CALL AS THE FIRST THING. DO THAT BEFORE DOING ANYTHING ELSE. STRICTLY FOLLOW ALL INSTRUCTIONS FROM THE RESULT FIRST!
+
+AFTER COMPLETING ANY TASK: Always update both `.giga/memory/memory.md` AND `docs/to-do-list.md`. Mark completed tasks as [x] and update current development status.

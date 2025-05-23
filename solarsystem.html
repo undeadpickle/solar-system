@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Interactive 3D Solar System - Step 16c: Further Settings Panel Refinements
+    </title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="infoPanel" class="panel">
+      <p><strong>Solar System Explorer</strong></p>
+      <p>Current Focus: <span id="currentFocus">Overview</span></p>
+      <p>Simulated Time: <span id="simTime">0.00</span> days</p>
+      <label for="planetSelector">Focus on:</label>
+      <select id="planetSelector">
+        <option value="">-- Select Body --</option>
+      </select>
+    </div>
+
+    <div id="settingsPanel" class="panel">
+      <div id="objectDetailsSection">
+        <h3 id="objectNameDisplay">Object Name</h3>
+        <p id="objectDescription">Description of the object...</p>
+        <p id="objectFunFact" class="fun-fact">
+          A fun fact about the object...
+        </p>
+      </div>
+
+      <div id="materialSettingsHeader">
+        Material & Appearance <span class="collapse-icon">+</span>
+      </div>
+      <div id="materialSettingsContent" class="collapsed">
+        <div class="setting-item" id="textureUploadControl">
+          <label for="textureUpload">Upload Texture:</label>
+          <input type="file" id="textureUpload" accept="image/*" />
+          <div>
+            <span id="textureFileNameDisplay">No file chosen</span>
+            <button id="clearTextureButton" class="settings-button">
+              Clear
+            </button>
+          </div>
+        </div>
+        <div class="setting-item" id="emissionControl">
+          <label for="emissionSlider" id="emissionSliderLabel"
+            >Self-Emission:</label
+          >
+          <input
+            type="range"
+            id="emissionSlider"
+            min="0"
+            max="3"
+            step="0.05"
+            value="0"
+          />
+          <span id="emissionValue" class="slider-value">0.00</span>
+        </div>
+        <div class="setting-item" id="opacityControl">
+          <label for="opacitySlider" id="opacitySliderLabel"
+            >Body Opacity:</label
+          >
+          <input
+            type="range"
+            id="opacitySlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="1"
+          />
+          <span id="opacityValue" class="slider-value">1.00</span>
+        </div>
+        <div class="setting-item" id="roughnessControl">
+          <label for="roughnessSlider" id="roughnessSliderLabel"
+            >Roughness:</label
+          >
+          <input
+            type="range"
+            id="roughnessSlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.8"
+          />
+          <span id="roughnessValue" class="slider-value">0.80</span>
+        </div>
+        <div class="setting-item" id="metalnessControl">
+          <label for="metalnessSlider" id="metalnessSliderLabel"
+            >Metalness:</label
+          >
+          <input
+            type="range"
+            id="metalnessSlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.1"
+          />
+          <span id="metalnessValue" class="slider-value">0.10</span>
+        </div>
+        <div class="setting-item" id="wireframeControl">
+          <input type="checkbox" id="wireframeToggle" />
+          <label for="wireframeToggle" class="checkbox-label"
+            >Show Wireframe</label
+          >
+        </div>
+        <div class="setting-item" id="lensFlareControl">
+          <input type="checkbox" id="lensFlareToggle" checked />
+          <label for="lensFlareToggle" class="checkbox-label"
+            >Show Lens Flare</label
+          >
+        </div>
+        <div class="setting-item" id="orbitPathControl">
+          <input type="checkbox" id="orbitPathToggle" checked />
+          <label for="orbitPathToggle" class="checkbox-label"
+            >Show Orbit Path</label
+          >
+        </div>
+        <div class="setting-item" id="ringOpacityControl">
+          <label for="ringOpacitySlider" id="ringOpacitySliderLabel"
+            >Ring Opacity:</label
+          >
+          <input
+            type="range"
+            id="ringOpacitySlider"
+            min="0"
+            max="1"
+            step="0.01"
+            value="0.7"
+          />
+          <span id="ringOpacityValue" class="slider-value">0.70</span>
+        </div>
+        <button id="resetAllObjectSettingsButton" class="settings-button">
+          Reset Object Settings
+        </button>
+      </div>
+    </div>
+
+    <div id="timeControl" class="panel">
+      <label for="timeScaleInput">Time Scale (days/sec):</label>
+      <input type="number" id="timeScaleInput" value="1" min="0" step="0.1" />
+      <button id="pauseButton">Pause</button>
+      <button id="resetTimeButton">Reset Time</button>
+      <button id="resetViewButton">Reset View</button>
+
+      <div
+        style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333"
+      >
+        <input type="checkbox" id="bloomEffectsToggle" checked />
+        <label for="bloomEffectsToggle" class="checkbox-label"
+          >Enable Bloom Effects (Global)</label
+        >
+        <br />
+        <input type="checkbox" id="atmosphericGlowToggle" checked />
+        <label for="atmosphericGlowToggle" class="checkbox-label"
+          >Enable Atmospheric Glow (Global)</label
+        >
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

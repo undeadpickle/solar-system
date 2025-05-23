@@ -1,0 +1,242 @@
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #000000;
+  color: white;
+  font-family: "Inter", Arial, sans-serif;
+}
+canvas {
+  display: block;
+}
+.panel {
+  position: absolute;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  max-width: 300px;
+  font-size: 0.9em;
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+  color: #f0f0f0;
+}
+#infoPanel {
+  top: 10px;
+  left: 10px;
+}
+#infoPanel p,
+#infoPanel select,
+#infoPanel label {
+  margin: 5px 0;
+}
+#infoPanel select {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #222;
+  color: white;
+  border: 1px solid #555;
+  font-size: 0.9em;
+}
+#timeControl {
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+#timeControl label,
+#timeControl input,
+#timeControl button {
+  margin-right: 8px;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+  padding: 5px 8px;
+  border-radius: 5px;
+  border: 1px solid #555;
+}
+#timeControl input[type="number"] {
+  width: 70px;
+  background-color: #222;
+  color: white;
+}
+#timeControl button {
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+#timeControl button:hover {
+  background-color: #0056b3;
+}
+#resetViewButton {
+  background-color: #17a2b8;
+}
+#resetViewButton:hover {
+  background-color: #138496;
+}
+
+/* Enhanced Settings Panel Styles */
+#settingsPanel {
+  top: 10px;
+  right: 10px;
+  display: none;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+#objectDetailsSection {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #444;
+}
+#objectDetailsSection h3 {
+  font-size: 1.4em;
+  color: #00ffff;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+#objectDetailsSection p {
+  font-size: 0.95em;
+  line-height: 1.5;
+  margin-bottom: 8px;
+  color: #ddd;
+}
+#objectDetailsSection .fun-fact {
+  font-style: italic;
+  color: #aaa;
+  font-size: 0.9em;
+}
+
+#materialSettingsHeader {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #00ffff;
+  cursor: pointer;
+  padding: 8px 0;
+  border-bottom: 1px solid #444;
+  margin-bottom: 10px;
+  position: relative;
+}
+.collapse-icon {
+  font-family: monospace;
+  font-size: 1.1em;
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+#materialSettingsContent {
+  padding-left: 5px;
+}
+#materialSettingsContent.collapsed {
+  display: none;
+}
+
+#settingsPanel div.setting-item {
+  margin-bottom: 12px;
+}
+#settingsPanel label {
+  display: block;
+  margin-bottom: 5px;
+  color: #ccc;
+  font-size: 0.9em;
+}
+#settingsPanel input[type="range"] {
+  width: calc(100% - 55px);
+  margin-right: 5px;
+  vertical-align: middle;
+}
+#settingsPanel input[type="checkbox"] {
+  vertical-align: middle;
+  margin-right: 5px;
+}
+#settingsPanel span.slider-value {
+  display: inline-block;
+  width: 40px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+  color: #fff;
+  font-size: 0.9em;
+}
+#settingsPanel .disabled-control,
+#settingsPanel .disabled-slider-label {
+  color: #666 !important;
+}
+#settingsPanel input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#settingsPanel input[type="checkbox"]:disabled + label.checkbox-label {
+  color: #666 !important;
+  cursor: not-allowed;
+}
+#settingsPanel .checkbox-label {
+  display: inline;
+  font-weight: normal;
+  color: #ccc;
+  font-size: 0.9em;
+}
+#textureUploadControl {
+  display: flex;
+  flex-direction: column;
+}
+#textureUpload {
+  padding: 5px;
+  background-color: #222;
+  border: 1px solid #555;
+  border-radius: 4px;
+  color: #ccc;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+#textureUpload::-webkit-file-upload-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+#textureUpload::file-selector-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+#textureFileNameDisplay {
+  font-size: 0.85em;
+  color: #aaa;
+  margin-top: 3px;
+  margin-bottom: 5px;
+  display: inline-block;
+  max-width: calc(100% - 70px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.settings-button {
+  background-color: #444;
+  color: #ddd;
+  border: 1px solid #666;
+  padding: 4px 8px;
+  font-size: 0.85em;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.settings-button:hover {
+  background-color: #555;
+}
+#resetAllObjectSettingsButton {
+  /* Renamed for clarity */
+  display: block;
+  width: 100%;
+  margin-top: 15px;
+  background-color: #dc3545;
+}
+#resetAllObjectSettingsButton:hover {
+  background-color: #c82333;
+}
