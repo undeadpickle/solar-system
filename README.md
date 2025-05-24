@@ -8,7 +8,8 @@ An interactive 3D Solar System simulation built with Three.js that provides an e
 
 ### Core Simulation
 
-- **Realistic 3D Solar System**: All 8 planets, 20+ moons, and ring systems
+- **Realistic 3D Solar System**: All 8 planets, 20+ moons, ring systems, and scientifically accurate asteroid belt
+- **Asteroid Belt**: 150 asteroids with realistic distribution, Kirkwood gaps, and asteroid families
 - **Orbital Mechanics**: Based on Keplerian orbital elements with accurate motion
 - **Time Control**: Adjustable time scale, pause/resume, and reset functionality
 - **Interactive Navigation**: Free-look camera controls with click-to-focus
@@ -140,8 +141,10 @@ solar-system/
 This simulation is designed as an educational tool for:
 
 - **Students**: K-12 through early college astronomy courses
-- **Educators**: Teaching solar system concepts and orbital mechanics
-- **Enthusiasts**: Anyone interested in space and astronomy
+- **Educators**: Teaching solar system concepts, orbital mechanics, and gravitational resonances
+- **Enthusiasts**: Anyone interested in space, astronomy, and solar system structure
+
+Key educational features include realistic asteroid belt distribution with Kirkwood gaps demonstrating Jupiter's gravitational influence.
 
 ## 🚧 Roadmap
 
