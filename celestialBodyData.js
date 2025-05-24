@@ -634,6 +634,298 @@ export const solarSystemData = [
   },
 ];
 
+// --- SCIENTIFICALLY ACCURATE ASTEROID BELT CONFIGURATION ---
+export const ASTEROID_BELT_CONFIG = {
+  count: 150, // Increased for better representation with gaps
+  innerRadius: 2.1 * AU, // Just inside 4:1 resonance
+  outerRadius: 3.4 * AU, // Just outside 2:1 resonance
+  minSize: 0.5, // km
+  maxSize: 50, // km
+  minInclination: 0,
+  maxInclination: 25, // degrees
+  minEccentricity: 0.05,
+  maxEccentricity: 0.3,
+  baseColor: 0x8b7355,
+  colorVariation: 0x333333,
+
+  // Kirkwood gaps (major resonances with Jupiter)
+  kirkwoodGaps: [
+    { center: 2.06 * AU, width: 0.08 * AU, name: "4:1 resonance" }, // Inner boundary
+    { center: 2.5 * AU, width: 0.12 * AU, name: "3:1 resonance" }, // Major gap
+    { center: 2.82 * AU, width: 0.08 * AU, name: "5:2 resonance" },
+    { center: 2.96 * AU, width: 0.06 * AU, name: "7:3 resonance" },
+    { center: 3.28 * AU, width: 0.1 * AU, name: "2:1 resonance" }, // Outer boundary
+  ],
+
+  // Asteroid families (clusters of related asteroids)
+  asteroidFamilies: [
+    {
+      name: "Flora",
+      center: 2.25 * AU,
+      spread: 0.15 * AU,
+      count: 25,
+      color: 0xa0856b,
+      inclination: { mean: 5.5, spread: 3.0 },
+      eccentricity: { mean: 0.15, spread: 0.08 },
+    },
+    {
+      name: "Vesta",
+      center: 2.35 * AU,
+      spread: 0.12 * AU,
+      count: 18,
+      color: 0x9a8570,
+      inclination: { mean: 7.1, spread: 2.5 },
+      eccentricity: { mean: 0.12, spread: 0.06 },
+    },
+    {
+      name: "Eunomia",
+      center: 2.65 * AU,
+      spread: 0.18 * AU,
+      count: 20,
+      color: 0x8a7865,
+      inclination: { mean: 11.7, spread: 4.0 },
+      eccentricity: { mean: 0.18, spread: 0.09 },
+    },
+    {
+      name: "Koronis",
+      center: 2.87 * AU,
+      spread: 0.14 * AU,
+      count: 15,
+      color: 0x7a6b58,
+      inclination: { mean: 2.1, spread: 1.5 },
+      eccentricity: { mean: 0.06, spread: 0.04 },
+    },
+    {
+      name: "Eos",
+      center: 3.01 * AU,
+      spread: 0.16 * AU,
+      count: 22,
+      color: 0x6b5c49,
+      inclination: { mean: 10.9, spread: 3.5 },
+      eccentricity: { mean: 0.11, spread: 0.07 },
+    },
+  ],
+
+  // Density zones (higher density in stable regions)
+  densityZones: [
+    { center: 2.2 * AU, width: 0.2 * AU, density: 1.5 }, // Inner belt - high density
+    { center: 2.7 * AU, width: 0.3 * AU, density: 2.0 }, // Middle belt - highest density
+    { center: 3.15 * AU, width: 0.2 * AU, density: 1.2 }, // Outer belt - moderate density
+  ],
+};
+
+/**
+ * Checks if a semi-major axis falls within any Kirkwood gap
+ * @param {number} a - Semi-major axis in AU
+ * @param {Array} gaps - Array of gap objects
+ * @returns {boolean} True if within a gap
+ */
+function isInKirkwoodGap(a, gaps) {
+  return gaps.some((gap) => Math.abs(a - gap.center) < gap.width / 2);
+}
+
+/**
+ * Gets density multiplier for a given semi-major axis
+ * @param {number} a - Semi-major axis
+ * @param {Array} zones - Density zones
+ * @returns {number} Density multiplier
+ */
+function getDensityMultiplier(a, zones) {
+  for (const zone of zones) {
+    if (Math.abs(a - zone.center) < zone.width / 2) {
+      return zone.density;
+    }
+  }
+  return 0.3; // Low density outside main zones
+}
+
+/**
+ * Generates asteroid belt data with realistic structure including Kirkwood gaps and families
+ * @returns {Array} Array of asteroid objects with orbital data
+ */
+export function generateAsteroidBelt() {
+  const asteroids = [];
+  const {
+    count,
+    innerRadius,
+    outerRadius,
+    minSize,
+    maxSize,
+    minInclination,
+    maxInclination,
+    minEccentricity,
+    maxEccentricity,
+    baseColor,
+    colorVariation,
+    kirkwoodGaps,
+    asteroidFamilies,
+    densityZones,
+  } = ASTEROID_BELT_CONFIG;
+
+  // First, generate family asteroids (clustered)
+  let asteroidIndex = 1;
+  for (const family of asteroidFamilies) {
+    let familyGeneratedCount = 0;
+    let familyAttempts = 0;
+    const maxFamilyAttempts = family.count * 20; // Prevent infinite loops per family
+
+    while (
+      familyGeneratedCount < family.count &&
+      familyAttempts < maxFamilyAttempts
+    ) {
+      familyAttempts++;
+
+      // Gaussian distribution around family center
+      const a =
+        family.center +
+        (Math.random() - 0.5) * family.spread * (Math.random() + Math.random()); // Box-Muller approximation
+
+      // Skip if in Kirkwood gap
+      if (isInKirkwoodGap(a, kirkwoodGaps)) continue;
+
+      // Family-specific orbital parameters
+      const e = Math.max(
+        0.01,
+        Math.min(
+          0.4,
+          family.eccentricity.mean +
+            (Math.random() - 0.5) * family.eccentricity.spread * 2
+        )
+      );
+      const i = Math.max(
+        0,
+        Math.min(
+          25,
+          family.inclination.mean +
+            (Math.random() - 0.5) * family.inclination.spread * 2
+        )
+      );
+
+      const M = Math.random() * 360;
+      const w = Math.random() * 360;
+      const Omega = Math.random() * 360;
+
+      // Calculate period using Kepler's third law
+      const period = Math.sqrt(Math.pow(a / AU, 3)) * 365.25;
+
+      // Family-specific size and color
+      const radius = minSize + Math.random() * (maxSize - minSize);
+      const familyColorVariation = (Math.random() - 0.5) * colorVariation * 0.5;
+      const asteroidColor = family.color + familyColorVariation;
+
+      asteroids.push({
+        name: `${family.name}-${familyGeneratedCount + 1}`,
+        type: "asteroid",
+        radius: radius,
+        color: asteroidColor,
+        parent: "Sun",
+        family: family.name,
+        orbitalElements: {
+          a: a,
+          e: e,
+          i: i,
+          M: M,
+          w: w,
+          Omega: Omega,
+          period: period,
+        },
+        rotationPeriod: 8 + Math.random() * 16,
+        axialTilt: Math.random() * 180,
+        description: `A ${family.name} family asteroid, part of a cluster formed from the breakup of a larger parent body.`,
+        funFact: `This ${family.name} family member orbits the Sun every ${
+          Math.round((period / 365.25) * 10) / 10
+        } years, sharing similar orbital characteristics with its family.`,
+      });
+      familyGeneratedCount++;
+      asteroidIndex++;
+    }
+  }
+
+  // Generate background asteroids with realistic density distribution
+  const backgroundCount = count - asteroids.length;
+  let attempts = 0;
+  const maxAttempts = backgroundCount * 5; // Reduced attempts to prevent hanging
+
+  while (asteroids.length < count && attempts < maxAttempts) {
+    attempts++;
+
+    // Random position with density bias
+    const a = innerRadius + Math.random() * (outerRadius - innerRadius);
+
+    // Skip if in Kirkwood gap
+    if (isInKirkwoodGap(a, kirkwoodGaps)) continue;
+
+    // Apply density filtering
+    const densityMultiplier = getDensityMultiplier(a, densityZones);
+    if (Math.random() > densityMultiplier * 0.8) continue; // Increased acceptance rate
+
+    // Random orbital parameters
+    const e =
+      minEccentricity + Math.random() * (maxEccentricity - minEccentricity);
+    const i =
+      minInclination + Math.random() * (maxInclination - minInclination);
+    const M = Math.random() * 360;
+    const w = Math.random() * 360;
+    const Omega = Math.random() * 360;
+
+    // Calculate period using Kepler's third law
+    const period = Math.sqrt(Math.pow(a / AU, 3)) * 365.25;
+
+    // Random size and color
+    const radius = minSize + Math.random() * (maxSize - minSize);
+    const colorVariationAmount = (Math.random() - 0.5) * colorVariation;
+    const asteroidColor = baseColor + colorVariationAmount;
+
+    asteroids.push({
+      name: `Asteroid-${asteroidIndex}`,
+      type: "asteroid",
+      radius: radius,
+      color: asteroidColor,
+      parent: "Sun",
+      family: "Background",
+      orbitalElements: {
+        a: a,
+        e: e,
+        i: i,
+        M: M,
+        w: w,
+        Omega: Omega,
+        period: period,
+      },
+      rotationPeriod: 8 + Math.random() * 16,
+      axialTilt: Math.random() * 180,
+      description: `A small rocky body in the asteroid belt, avoiding the Kirkwood gaps cleared by Jupiter's gravitational resonances.`,
+      funFact: `This asteroid orbits in a stable region at ${(a / AU).toFixed(
+        2
+      )} AU, completing one orbit every ${
+        Math.round((period / 365.25) * 10) / 10
+      } Earth years.`,
+    });
+    asteroidIndex++;
+  }
+
+  console.log(
+    `Generated ${asteroids.length} asteroids: ${asteroidFamilies.reduce(
+      (sum, f) => {
+        const familyCount = asteroids.filter((a) => a.family === f.name).length;
+        return sum + familyCount;
+      },
+      0
+    )} in families, ${
+      asteroids.length -
+      asteroidFamilies.reduce((sum, f) => {
+        const familyCount = asteroids.filter((a) => a.family === f.name).length;
+        return sum + familyCount;
+      }, 0)
+    } background`
+  );
+  console.log(
+    `Kirkwood gaps at: ${kirkwoodGaps.map((g) => g.name).join(", ")}`
+  );
+
+  return asteroids;
+}
+
 export const initialCameraPosition = {
   x: 0,
   y: distanceScaleFactor * 4,

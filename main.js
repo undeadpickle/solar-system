@@ -12,6 +12,8 @@ import {
   MOON_VISUAL_ORBIT_GAP,
   solarSystemData,
   initialCameraPosition,
+  ASTEROID_BELT_CONFIG,
+  generateAsteroidBelt,
 } from "./celestialBodyData.js";
 
 import {
@@ -146,6 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "atmosphericGlowToggle"
   );
 
+  // Asteroid belt UI controls (global controls)
+  const asteroidBeltToggle = document.getElementById("asteroidBeltToggle");
+
   // Constants now imported from celestialBodyData.js
 
   // Celestial body data now imported from celestialBodyData.js
@@ -183,6 +188,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Create celestial bodies
       solarSystemData.forEach((data) => createCelestialBody(data, sunLight));
+
+      // Generate and create asteroid belt
+      console.log("Generating asteroid belt...");
+      const asteroidBeltData = generateAsteroidBelt();
+      asteroidBeltData.forEach((asteroid) =>
+        createCelestialBody(asteroid, sunLight)
+      );
+      console.log(`Created ${asteroidBeltData.length} asteroids in the belt.`);
 
       // Setup planet selector dropdown
       setupPlanetSelector(setFocus);
@@ -232,6 +245,9 @@ document.addEventListener("DOMContentLoaded", () => {
         "change",
         handleAtmosphericGlowToggle
       );
+
+      // Asteroid belt toggle
+      asteroidBeltToggle.addEventListener("change", handleAsteroidBeltToggle);
 
       // Bloom effects toggle
       bloomEffectsToggle.addEventListener("change", handleBloomEffectsToggle);
@@ -688,22 +704,39 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {Event} e - The toggle event
    */
   function handleAtmosphericGlowToggle(e) {
-    const isEnabled = e.target.checked;
+    const enabled = e.target.checked;
     const gasGiants = ["Jupiter", "Saturn", "Uranus", "Neptune"];
 
     gasGiants.forEach((planetName) => {
-      const planetObject = objectLookup[planetName];
-      if (planetObject && planetObject.userData.atmosphereGroup) {
-        planetObject.userData.atmosphericGlowVisible = isEnabled;
-        planetObject.userData.atmosphereGroup.visible = isEnabled;
+      const planetMesh = objectLookup[planetName];
+      if (planetMesh && planetMesh.userData.atmosphereGroup) {
+        planetMesh.userData.atmosphereGroup.visible = enabled;
+        planetMesh.userData.atmosphericGlowVisible = enabled;
       }
     });
 
     console.log(
       "Atmospheric glow:",
-      isEnabled ? "enabled" : "disabled",
+      enabled ? "enabled" : "disabled",
       "for all gas giants"
     );
+  }
+
+  /**
+   * Toggles visibility of all asteroid belt objects
+   * @param {Event} e - The change event from the checkbox
+   */
+  function handleAsteroidBeltToggle(e) {
+    const enabled = e.target.checked;
+
+    // Find all asteroid objects and toggle their visibility
+    celestialObjects.forEach((bodyMesh) => {
+      if (bodyMesh.userData.type === "asteroid") {
+        bodyMesh.userData.pivot.visible = enabled;
+      }
+    });
+
+    console.log("Asteroid belt:", enabled ? "visible" : "hidden");
   }
 
   /**
@@ -824,8 +857,23 @@ document.addEventListener("DOMContentLoaded", () => {
         data.type === "moon" ? MOON_MIN_VISUAL_RADIUS : minVisualRadius,
         data.radius * planetSizeScale
       );
+
+      // Special handling for asteroids - make them much more visible
+      if (data.type === "asteroid") {
+        scaledRadius = Math.max(
+          minVisualRadius * 2.0,
+          data.radius * planetSizeScale * 5.0
+        ); // Much larger and more visible
+      }
+
       const segments =
-        data.radius > 20000 ? 64 : data.type === "moon" ? 16 : 32;
+        data.radius > 20000
+          ? 64
+          : data.type === "moon"
+          ? 16
+          : data.type === "asteroid"
+          ? 8
+          : 32;
       geometry = new THREE.SphereGeometry(scaledRadius, segments, segments);
 
       if (texture) {
@@ -855,6 +903,14 @@ document.addEventListener("DOMContentLoaded", () => {
         materialProperties.emissiveIntensity =
           data.emissiveIntensity !== undefined ? data.emissiveIntensity : 0;
       }
+
+      if (data.type === "asteroid") {
+        materialProperties.roughness =
+          data.roughness !== undefined ? data.roughness : 0.95; // Very rough surfaces
+        materialProperties.metalness =
+          data.metalness !== undefined ? data.metalness : 0.02; // Mostly rocky
+      }
+
       material = new THREE.MeshStandardMaterial(materialProperties);
     }
 
@@ -1029,7 +1085,11 @@ document.addEventListener("DOMContentLoaded", () => {
         -Math.sin(w_rad) * Math.sin(Omega_rad) +
         Math.cos(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
       const Qz_ref = Math.cos(w_rad) * Math.sin(i_rad);
-      addOrbitPath(data, bodyMesh);
+
+      // Only create orbit paths for planets and moons, not asteroids (to avoid clutter)
+      if (data.type !== "asteroid") {
+        addOrbitPath(data, bodyMesh);
+      }
     }
   }
 
