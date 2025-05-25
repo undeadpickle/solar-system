@@ -42,7 +42,6 @@ import {
   handleRoughnessChange,
   handleMetalnessChange,
   handleWireframeToggle,
-  handleOrbitPathToggle,
   handleRingOpacityChange,
   handleTimeScaleChange as uiHandleTimeScaleChange,
 } from "./uiControls.js";
@@ -126,9 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const wireframeControl = document.getElementById("wireframeControl");
   const wireframeToggle = document.getElementById("wireframeToggle");
 
-  const orbitPathControl = document.getElementById("orbitPathControl");
-  const orbitPathToggle = document.getElementById("orbitPathToggle");
-
   const ringOpacityControl = document.getElementById("ringOpacityControl");
   const ringOpacitySlider = document.getElementById("ringOpacitySlider");
   const ringOpacityValueDisplay = document.getElementById("ringOpacityValue");
@@ -151,6 +147,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Asteroid belt UI controls (global controls)
   const asteroidBeltToggle = document.getElementById("asteroidBeltToggle");
 
+  // Global orbit paths control
+  const orbitPathsGlobalToggle = document.getElementById(
+    "orbitPathsGlobalToggle"
+  );
+
   // Constants now imported from celestialBodyData.js
 
   // Celestial body data now imported from celestialBodyData.js
@@ -169,7 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
       opacitySlider,
       opacityValueDisplay,
       wireframeToggle,
-      orbitPathToggle,
       ringOpacitySlider,
       ringOpacityValueDisplay,
       lensFlareToggle,
@@ -249,6 +249,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Asteroid belt toggle
       asteroidBeltToggle.addEventListener("change", handleAsteroidBeltToggle);
 
+      // Global orbit paths toggle
+      orbitPathsGlobalToggle.addEventListener(
+        "change",
+        handleOrbitPathsGlobalToggle
+      );
+
       // Bloom effects toggle
       bloomEffectsToggle.addEventListener("change", handleBloomEffectsToggle);
 
@@ -269,9 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
       );
       wireframeToggle.addEventListener("change", (e) =>
         handleWireframeToggle(e, settingsTargetObject)
-      );
-      orbitPathToggle.addEventListener("change", (e) =>
-        handleOrbitPathToggle(e, settingsTargetObject)
       );
       ringOpacitySlider.addEventListener("input", (e) =>
         handleRingOpacityChange(
@@ -737,6 +740,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     console.log("Asteroid belt:", enabled ? "visible" : "hidden");
+  }
+
+  /**
+   * Toggles visibility of all orbit paths globally
+   * @param {Event} e - The change event from the checkbox
+   */
+  function handleOrbitPathsGlobalToggle(e) {
+    const enabled = e.target.checked;
+
+    // Find all celestial objects and toggle their orbit paths (excluding asteroids and Sun)
+    celestialObjects.forEach((bodyMesh) => {
+      if (
+        bodyMesh.userData.orbitPath &&
+        bodyMesh.userData.type !== "asteroid" &&
+        bodyMesh.userData.type !== "star"
+      ) {
+        bodyMesh.userData.orbitPath.visible = enabled;
+      }
+    });
+
+    console.log("All orbit paths:", enabled ? "visible" : "hidden");
   }
 
   /**
@@ -1254,17 +1278,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .querySelector('label[for="wireframeToggle"]')
         .classList.remove("disabled-control");
       wireframeToggle.checked = mat.wireframe || userData.initialWireframe;
-
-      if (userData.orbitPath) {
-        orbitPathControl.style.display = "block"; // Now inside material settings
-        orbitPathToggle.disabled = false;
-        document
-          .querySelector('label[for="orbitPathToggle"]')
-          .classList.remove("disabled-control");
-        orbitPathToggle.checked = userData.orbitPath.visible;
-      } else {
-        orbitPathControl.style.display = "none";
-      }
 
       if (userData.ringMesh && userData.ringMesh.material) {
         ringOpacityControl.style.display = "block"; // Now inside material settings

@@ -56,7 +56,7 @@
     - [x] Show Orbit Path Toggle (within collapsible section)
     - [x] Ring Opacity Slider (within collapsible section, for ringed planets)
     - [x] Reset Object Settings Button (within collapsible section, resets all relevant properties including orbit path & ring opacity)
-- [x] 4.3.6 Global Visual Effects Controls (Bloom effects and atmospheric glow toggles consolidated in time control panel for scene-wide management)
+- [x] 4.3.6 Global Visual Effects Controls (Bloom effects, atmospheric glow, asteroid belt, and orbit paths toggles consolidated in time control panel for scene-wide management)
 
 ---
 

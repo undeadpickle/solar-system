@@ -64,7 +64,7 @@
   - **Sun Lens Flares**: Multi-element lens flare system with distance-based intensity and toggle control ✅
   - **Atmospheric Glow**: COMPLETELY ENHANCED with realistic gradient textures, Fresnel-like rim lighting, multi-layer depth system, planet-specific characteristics (Jupiter=warm orange-to-gold with storm bands, Saturn=pale golden, Uranus=bright cyan, Neptune=deep blue with storm bands), canvas-generated radial gradients replacing flat colors ✅
   - **Bloom/Glow Effects**: Post-processing bloom system FULLY WORKING with optimized intensity (0.3 strength, 0.2 radius, 0.9 threshold), Three.js script loading issues resolved, global toggle control in time panel ✅
-- ✅ **UI/UX Improvements**: Global visual effects controls (bloom and atmospheric glow) consolidated in time control panel for intuitive scene-wide management
+- ✅ **UI/UX Improvements**: Global visual effects controls (bloom, atmospheric glow, asteroid belt, orbit paths) consolidated in time control panel for intuitive scene-wide management
 - ✅ **GitHub Repository Setup**: COMPLETED
   - Repository initialized and configured at https://github.com/undeadpickle/solar-system.git
   - Comprehensive README.md with features, installation instructions, and usage guide
