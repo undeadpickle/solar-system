@@ -1,3 +1,61 @@
+// --- RING SYSTEM CONFIGURATION ---
+export const RING_SYSTEMS = {
+  Saturn: {
+    textureUrl:
+      "./images/stock_image___saturn_rings_by_alpha_element_d6ifske.png",
+    segments: 256,
+    radialSegments: 1,
+    defaultOpacity: 0.9,
+    textureConfig: {
+      wrapS: "RepeatWrapping",
+      wrapT: "RepeatWrapping",
+      repeat: [1, 1],
+      useAnisotropy: true,
+    },
+    material: {
+      transparent: true,
+      side: "DoubleSide",
+      depthWrite: false,
+      fog: false,
+      blending: "NormalBlending",
+    },
+  },
+  // Future ring systems can be added here (Jupiter, Uranus, Neptune)
+  Jupiter: {
+    segments: 64,
+    radialSegments: 1,
+    defaultOpacity: 0.25,
+    material: {
+      transparent: true,
+      side: "DoubleSide",
+      depthWrite: false,
+      fog: false,
+    },
+  },
+  Uranus: {
+    segments: 64,
+    radialSegments: 1,
+    defaultOpacity: 0.25,
+    material: {
+      transparent: true,
+      side: "DoubleSide",
+      depthWrite: false,
+      fog: false,
+    },
+  },
+  Neptune: {
+    segments: 64,
+    radialSegments: 1,
+    defaultOpacity: 0.25,
+    material: {
+      transparent: true,
+      side: "DoubleSide",
+      depthWrite: false,
+      fog: false,
+    },
+  },
+};
+
 // --- SCALES AND CONSTANTS ---
 export const AU = 149.6e6;
 export const distanceScaleFactor = 50;

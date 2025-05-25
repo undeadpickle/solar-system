@@ -19,6 +19,129 @@ export const objectLookup = {};
 export const textureLoader = new THREE.TextureLoader();
 
 /**
+ * Enhanced texture loading with automatic fallback for threeSetup.js
+ * Specialized version for starfield with procedural generation fallback
+ * @param {string} textureUrl - URL of the texture to load
+ * @param {number} fallbackColor - Fallback color (hex) if texture fails to load
+ * @param {string} objectName - Name of the object (for logging)
+ * @param {THREE.Material} material - Material to update if texture fails
+ * @param {string} materialProperty - Property to update ('map' or 'emissiveMap')
+ * @returns {THREE.Texture|null} Loaded texture or null if failed (fallback will be applied)
+ */
+function loadTextureWithFallbackStarfield(
+  textureUrl,
+  fallbackColor,
+  objectName,
+  material,
+  materialProperty = "map"
+) {
+  if (!textureUrl) return null;
+
+  const texture = textureLoader.load(
+    textureUrl,
+    (loadedTexture) => {
+      // Success callback
+      loadedTexture.colorSpace = THREE.SRGBColorSpace;
+      console.log(
+        `✅ Texture loaded successfully for ${objectName}: ${textureUrl}`
+      );
+    },
+    undefined, // Progress callback (not needed)
+    (error) => {
+      // Error callback - texture loading failed, generate procedural starfield
+      console.warn(
+        `⚠️ Texture loading failed for ${objectName}: ${textureUrl}`
+      );
+      console.warn(`🌟 Generating procedural starfield as fallback`);
+      console.warn("Error details:", error);
+
+      // Generate procedural starfield texture
+      const proceduralTexture = createStarfieldTexture(2048, 1024, 8000);
+
+      // Apply fallback texture to material
+      if (material && proceduralTexture) {
+        // Remove the failed texture
+        if (material[materialProperty]) {
+          material[materialProperty].dispose();
+          material[materialProperty] = null;
+        }
+
+        // Set procedural texture
+        material[materialProperty] = proceduralTexture;
+        material.color.set(0xffffff); // Use white with texture
+        material.needsUpdate = true;
+        console.log(
+          `🔄 Applied procedural starfield to ${objectName} material`
+        );
+      }
+    }
+  );
+
+  // Set color space immediately for successful loads
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
+
+/**
+ * Create a procedural starfield texture
+ * @param {number} width - Texture width
+ * @param {number} height - Texture height
+ * @param {number} starCount - Number of stars to generate
+ * @returns {THREE.CanvasTexture} Generated starfield texture
+ */
+function createStarfieldTexture(width, height, starCount) {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+
+  // Fill with deep space black
+  ctx.fillStyle = "#000011";
+  ctx.fillRect(0, 0, width, height);
+
+  // Generate stars
+  for (let i = 0; i < starCount; i++) {
+    const x = Math.random() * width;
+    const y = Math.random() * height;
+    const brightness = Math.random();
+    const size = Math.random() * 2 + 0.5;
+
+    // Color variation for stars
+    let starColor;
+    if (brightness > 0.9) {
+      starColor = `rgb(255, 255, ${Math.floor(200 + Math.random() * 55)})`; // Blue-white giants
+    } else if (brightness > 0.7) {
+      starColor = `rgb(255, ${Math.floor(
+        240 + Math.random() * 15
+      )}, ${Math.floor(200 + Math.random() * 55)})`; // White
+    } else if (brightness > 0.4) {
+      starColor = `rgb(255, ${Math.floor(
+        200 + Math.random() * 55
+      )}, ${Math.floor(100 + Math.random() * 100)})`; // Yellow
+    } else {
+      starColor = `rgb(255, ${Math.floor(
+        150 + Math.random() * 50
+      )}, ${Math.floor(50 + Math.random() * 50)})`; // Red
+    }
+
+    ctx.fillStyle = starColor;
+    ctx.globalAlpha = brightness * 0.8 + 0.2;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1.0;
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  console.log(
+    `🌟 Generated procedural starfield: ${width}x${height} with ${starCount} stars`
+  );
+  return texture;
+}
+
+/**
  * Initialize the Three.js scene, camera, renderer, lights, and controls
  * @returns {Object} Object containing scene, camera, renderer, orbitControls, celestialObjects, objectLookup, textureLoader
  */
@@ -28,17 +151,7 @@ export function initThreeJS() {
   // Create scene
   scene = new THREE.Scene();
 
-  // Add starfield background
-  const starGeometry = new THREE.SphereGeometry(10000, 64, 64);
-  const starTexture = textureLoader.load("./images/8k_stars.jpg");
-  starTexture.colorSpace = THREE.SRGBColorSpace;
-  const starMaterial = new THREE.MeshBasicMaterial({
-    map: starTexture,
-    side: THREE.BackSide,
-  });
-  scene.add(new THREE.Mesh(starGeometry, starMaterial));
-
-  // Create camera
+  // Create camera first (needed for starfield sizing)
   camera = new THREE.PerspectiveCamera(
     45,
     window.innerWidth / window.innerHeight,
@@ -51,6 +164,35 @@ export function initThreeJS() {
     initialCameraPosition.z
   );
   camera.lookAt(0, 0, 0);
+
+  // Now create starfield background (after camera exists)
+  const starGeometry = new THREE.SphereGeometry(camera.far * 0.9, 64, 64);
+
+  // Create starfield material first
+  const starMaterial = new THREE.MeshBasicMaterial({
+    color: 0x000000, // Black fallback
+    side: THREE.BackSide,
+    fog: false,
+  });
+
+  // Load starfield texture with fallback to procedural starfield
+  const starTexture = loadTextureWithFallbackStarfield(
+    "./images/8k_stars.jpg",
+    0x000022, // Dark blue fallback color (won't be used since we generate procedural)
+    "Starfield Background",
+    starMaterial,
+    "map"
+  );
+
+  if (starTexture) {
+    starMaterial.map = starTexture;
+    starMaterial.color.set(0xffffff); // Use white when texture is present
+  }
+  // If texture fails, the error callback will generate procedural stars
+
+  const starMesh = new THREE.Mesh(starGeometry, starMaterial);
+  starMesh.name = "Starfield";
+  scene.add(starMesh);
 
   // Create renderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -96,35 +238,6 @@ export function initThreeJS() {
     sunLight,
   };
 }
-
-/**
- * Create procedural starfield texture (DEPRECATED - now using 2k_stars.jpg texture file)
- * @param {number} width - Texture width
- * @param {number} height - Texture height
- * @param {number} numStars - Number of stars to generate
- * @returns {THREE.CanvasTexture} Generated starfield texture
- */
-/*
-export function createStarfieldTexture(width, height, numStars) {
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const context = canvas.getContext("2d");
-  context.fillStyle = "black";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  for (let i = 0; i < numStars; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    const radius = Math.random() * 1.3;
-    const alpha = 0.5 + Math.random() * 0.5;
-    context.beginPath();
-    context.arc(x, y, radius, 0, Math.PI * 2);
-    context.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-    context.fill();
-  }
-  return new THREE.CanvasTexture(canvas);
-}
-*/
 
 /**
  * Handle window resize events

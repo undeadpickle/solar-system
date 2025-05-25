@@ -14,6 +14,7 @@ import {
   initialCameraPosition,
   ASTEROID_BELT_CONFIG,
   generateAsteroidBelt,
+  RING_SYSTEMS,
 } from "./celestialBodyData.js";
 
 import {
@@ -52,6 +53,72 @@ import {
   updateAllCelestialBodies,
   addOrbitPath,
 } from "./physics.js";
+
+/**
+ * Enhanced texture loading with automatic fallback to appropriate planet colors
+ * @param {string} textureUrl - URL of the texture to load
+ * @param {number} fallbackColor - Fallback color (hex) if texture fails to load
+ * @param {string} objectName - Name of the object (for logging)
+ * @param {THREE.Material} material - Material to update if texture fails (optional)
+ * @param {string} materialProperty - Property to update ('map' or 'emissiveMap')
+ * @returns {THREE.Texture|null} Loaded texture or null if failed (fallback color will be used)
+ */
+function loadTextureWithFallback(
+  textureUrl,
+  fallbackColor,
+  objectName,
+  material = null,
+  materialProperty = "map"
+) {
+  if (!textureUrl) return null;
+
+  const texture = textureLoader.load(
+    textureUrl,
+    (loadedTexture) => {
+      // Success callback
+      loadedTexture.colorSpace = THREE.SRGBColorSpace;
+      console.log(
+        `✅ Texture loaded successfully for ${objectName}: ${textureUrl}`
+      );
+    },
+    undefined, // Progress callback (not needed)
+    (error) => {
+      // Error callback - texture loading failed
+      console.warn(
+        `⚠️ Texture loading failed for ${objectName}: ${textureUrl}`
+      );
+      console.warn(
+        `🎨 Falling back to color: #${fallbackColor
+          .toString(16)
+          .padStart(6, "0")}`
+      );
+      console.warn("Error details:", error);
+
+      // Apply fallback color to material if provided
+      if (material) {
+        // Remove the failed texture
+        if (material[materialProperty]) {
+          material[materialProperty].dispose();
+          material[materialProperty] = null;
+        }
+
+        // Set fallback color based on material property
+        if (materialProperty === "emissiveMap" && material.emissive) {
+          material.emissive.setHex(fallbackColor);
+        } else if (materialProperty === "map" && material.color) {
+          material.color.setHex(fallbackColor);
+        }
+
+        material.needsUpdate = true;
+        console.log(`🔄 Applied fallback color to ${objectName} material`);
+      }
+    }
+  );
+
+  // Set color space immediately for successful loads
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log(
@@ -832,33 +899,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let texture = null;
     let bodyMesh;
 
-    if (data.textureUrl) {
-      texture = textureLoader.load(
-        data.textureUrl,
-        undefined,
-        undefined,
-        (error) => {
-          console.error(
-            `Failed to load texture for ${data.name}: ${data.textureUrl}`,
-            error
-          );
-          if (bodyMesh && bodyMesh.material) {
-            if (data.type === "star") {
-              bodyMesh.material.emissiveMap = null;
-              if (bodyMesh.material.emissive)
-                bodyMesh.material.emissive.setHex(data.color);
-            } else {
-              bodyMesh.material.map = null;
-              if (bodyMesh.material.color)
-                bodyMesh.material.color.setHex(data.color);
-            }
-            bodyMesh.material.needsUpdate = true;
-          }
-        }
-      );
-      texture.colorSpace = THREE.SRGBColorSpace;
-    }
-
     if (data.type === "star") {
       scaledRadius = sunDisplayRadius;
       geometry = new THREE.SphereGeometry(scaledRadius, 64, 64);
@@ -867,15 +907,29 @@ document.addEventListener("DOMContentLoaded", () => {
       materialProperties.emissive = new THREE.Color(data.color);
       materialProperties.emissiveIntensity =
         data.emissiveIntensity !== undefined ? data.emissiveIntensity : 1.5;
-      if (texture) {
-        materialProperties.emissiveMap = texture;
-        materialProperties.emissive.set(0xffffff);
-      }
       materialProperties.roughness =
         data.roughness !== undefined ? data.roughness : 0.9;
       materialProperties.metalness =
         data.metalness !== undefined ? data.metalness : 0.1;
+
+      // Create material first
       material = new THREE.MeshStandardMaterial(materialProperties);
+
+      // Then load texture with fallback capability
+      if (data.textureUrl) {
+        texture = loadTextureWithFallback(
+          data.textureUrl,
+          data.color,
+          data.name,
+          material,
+          "emissiveMap"
+        );
+        if (texture) {
+          material.emissiveMap = texture;
+          material.emissive.set(0xffffff); // Use white when texture is present
+        }
+        // If texture fails, the error callback will set emissive color to fallback
+      }
     } else {
       scaledRadius = Math.max(
         data.type === "moon" ? MOON_MIN_VISUAL_RADIUS : minVisualRadius,
@@ -900,12 +954,8 @@ document.addEventListener("DOMContentLoaded", () => {
           : 32;
       geometry = new THREE.SphereGeometry(scaledRadius, segments, segments);
 
-      if (texture) {
-        materialProperties.map = texture;
-        materialProperties.color = 0xffffff;
-      } else {
-        materialProperties.color = data.color;
-      }
+      // Set initial color (will be overridden by texture if successful)
+      materialProperties.color = data.color;
 
       if (data.type === "moon") {
         materialProperties.roughness =
@@ -914,14 +964,11 @@ document.addEventListener("DOMContentLoaded", () => {
           data.metalness !== undefined ? data.metalness : 0.05;
       }
 
+      // Special emissive properties for Uranus and Neptune
       if (data.name === "Uranus" || data.name === "Neptune") {
         materialProperties.emissive = new THREE.Color(data.color);
         materialProperties.emissiveIntensity =
-          data.emissiveIntensity !== undefined
-            ? data.emissiveIntensity
-            : texture
-            ? 0.1
-            : 0.25;
+          data.emissiveIntensity !== undefined ? data.emissiveIntensity : 0.25; // Default emissive without texture
       } else if (data.type !== "star") {
         materialProperties.emissive = new THREE.Color(0x000000);
         materialProperties.emissiveIntensity =
@@ -935,7 +982,30 @@ document.addEventListener("DOMContentLoaded", () => {
           data.metalness !== undefined ? data.metalness : 0.02; // Mostly rocky
       }
 
+      // Create material first
       material = new THREE.MeshStandardMaterial(materialProperties);
+
+      // Then load texture with fallback capability
+      if (data.textureUrl) {
+        texture = loadTextureWithFallback(
+          data.textureUrl,
+          data.color,
+          data.name,
+          material,
+          "map"
+        );
+        if (texture) {
+          material.map = texture;
+          material.color.set(0xffffff); // Use white when texture is present
+        }
+        // If texture fails, the error callback will set color to fallback
+
+        // Adjust emissive for Uranus/Neptune with texture
+        if ((data.name === "Uranus" || data.name === "Neptune") && texture) {
+          materialProperties.emissiveIntensity = 0.1; // Reduced with texture
+          material.emissiveIntensity = 0.1;
+        }
+      }
     }
 
     bodyMesh = new THREE.Mesh(geometry, material);
@@ -1016,18 +1086,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create cloud layer for Earth
     if (data.name === "Earth") {
-      const cloudTexture = textureLoader.load("./images/2k_earth_clouds.jpg");
-      cloudTexture.colorSpace = THREE.SRGBColorSpace;
-
       const cloudRadius = scaledRadius * 1.01; // Slightly larger than Earth
       const cloudGeometry = new THREE.SphereGeometry(cloudRadius, 64, 64);
+
+      // Create cloud material first
       const cloudMaterial = new THREE.MeshStandardMaterial({
-        alphaMap: cloudTexture,
         transparent: true,
         opacity: 0.8,
         depthWrite: false, // Prevents z-fighting with Earth surface
         blending: THREE.NormalBlending,
+        color: 0xffffff, // Default to white, will be used if texture loads
       });
+
+      // Load cloud texture with fallback capability
+      const cloudTexture = loadTextureWithFallback(
+        "./images/2k_earth_clouds.jpg",
+        0xffffff, // White fallback (clouds will still work even if texture fails)
+        "Earth Clouds",
+        cloudMaterial,
+        "alphaMap"
+      );
+
+      if (cloudTexture) {
+        cloudMaterial.alphaMap = cloudTexture;
+      }
 
       const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
       cloudMesh.name = "Earth Clouds";
@@ -1050,54 +1132,114 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Enhanced ring implementation for Saturn with alpha texture
       if (data.name === "Saturn") {
-        // Load Saturn's ring alpha texture
-        const ringTexture = textureLoader.load(
-          "./images/stock_image___saturn_rings_by_alpha_element_d6ifske.png",
-          undefined,
-          undefined,
-          (error) => {
-            console.error("Failed to load Saturn ring texture:", error);
-          }
-        );
+        const ringConfig = RING_SYSTEMS.Saturn;
+        let ringOpacity =
+          data.initialRingOpacity !== undefined
+            ? data.initialRingOpacity
+            : ringConfig.defaultOpacity;
+        bodyMesh.userData.initialRingOpacity = ringOpacity;
 
-        // Configure texture for concentric circular mapping
-        ringTexture.wrapS = THREE.RepeatWrapping;
-        ringTexture.wrapT = THREE.RepeatWrapping;
-        ringTexture.repeat.set(1, 1); // Display raw texture to debug UV mapping
-        ringTexture.anisotropy = Math.min(
-          8,
-          renderer.capabilities.getMaxAnisotropy()
-        );
-        ringTexture.colorSpace = THREE.SRGBColorSpace;
-
-        // Create flat ring geometry
+        // Create ring geometry using centralized config
         const ringGeometry = new THREE.RingGeometry(
           innerR_scaled,
           outerR_scaled,
-          256, // High circumferential segments
-          1 // Single radial segment
+          ringConfig.segments,
+          ringConfig.radialSegments
         );
 
-        let ringOpacity =
-          data.initialRingOpacity !== undefined ? data.initialRingOpacity : 0.9;
-        bodyMesh.userData.initialRingOpacity = ringOpacity;
-
-        // Create material with alpha texture for realistic transparency
+        // Create ring material with fallback color using centralized config
         const ringMaterial = new THREE.MeshBasicMaterial({
-          map: ringTexture,
-          alphaMap: ringTexture,
-          transparent: true,
+          transparent: ringConfig.material.transparent,
           opacity: ringOpacity,
           side: THREE.DoubleSide,
-          depthWrite: false,
-          fog: false,
+          depthWrite: ringConfig.material.depthWrite,
+          fog: ringConfig.material.fog,
+          color: data.ringColor || 0xd0b080, // Default ring color
+          blending: THREE.NormalBlending, // Important for solid color transparency
         });
 
+        // Always create the ring mesh
         const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
         ringMesh.name = data.name + " Rings";
+        ringMesh.rotation.x = -Math.PI / 2; // Rotate to lie in Saturn's equatorial plane
 
-        // Rotate ring to lie in Saturn's equatorial plane
-        ringMesh.rotation.x = -Math.PI / 2;
+        // Try to load Saturn's ring texture with fallback capability
+        const ringTexture = loadTextureWithFallback(
+          ringConfig.textureUrl,
+          data.ringColor || 0xd0b080, // Saturn's default ring color as fallback
+          "Saturn Rings",
+          ringMaterial,
+          "map"
+        );
+
+        if (ringTexture) {
+          // Success: Enhance material with high-quality texture using config
+          console.log("🪐 Using high-quality textured rings for Saturn");
+
+          // Configure texture using centralized config
+          if (ringConfig.textureConfig.wrapS) {
+            ringTexture.wrapS = THREE[ringConfig.textureConfig.wrapS];
+          }
+          if (ringConfig.textureConfig.wrapT) {
+            ringTexture.wrapT = THREE[ringConfig.textureConfig.wrapT];
+          }
+          if (ringConfig.textureConfig.repeat) {
+            ringTexture.repeat.set(...ringConfig.textureConfig.repeat);
+          }
+          if (ringConfig.textureConfig.useAnisotropy) {
+            ringTexture.anisotropy = Math.min(
+              8,
+              renderer.capabilities.getMaxAnisotropy()
+            );
+          }
+
+          ringMaterial.map = ringTexture;
+          ringMaterial.alphaMap = ringTexture;
+        } else {
+          // Fallback: Use solid color rings with enhanced transparency support
+          console.log("🪐 Using solid color fallback rings for Saturn");
+
+          // Ensure proper transparency for solid color rings
+          ringMaterial.transparent = true;
+          ringMaterial.alphaTest = 0.001; // Helps with depth sorting
+          ringMaterial.depthWrite = false; // Important for transparency
+          ringMaterial.blending = THREE.NormalBlending;
+
+          // Create a subtle gradient effect for better visual appearance
+          const canvas = document.createElement("canvas");
+          canvas.width = 256;
+          canvas.height = 16;
+          const ctx = canvas.getContext("2d");
+
+          // Create radial-like gradient for rings
+          const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+          const baseColor = new THREE.Color(data.ringColor || 0xd0b080);
+
+          // Add some variation to make rings more interesting
+          for (let i = 0; i <= 10; i++) {
+            const pos = i / 10;
+            const alpha = 0.3 + Math.sin(pos * Math.PI * 6) * 0.2; // Varying transparency
+            gradient.addColorStop(
+              pos,
+              `rgba(${Math.floor(baseColor.r * 255)}, ${Math.floor(
+                baseColor.g * 255
+              )}, ${Math.floor(baseColor.b * 255)}, ${alpha})`
+            );
+          }
+
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const fallbackTexture = new THREE.CanvasTexture(canvas);
+          fallbackTexture.wrapS = THREE.RepeatWrapping;
+          fallbackTexture.wrapT = THREE.RepeatWrapping;
+
+          ringMaterial.map = fallbackTexture;
+          ringMaterial.alphaMap = fallbackTexture;
+          console.log(
+            "🎨 Generated procedural ring texture for better transparency"
+          );
+        }
 
         bodyMesh.userData.ringMesh = ringMesh;
         bodyMesh.userData.tiltedPole.add(ringMesh);
