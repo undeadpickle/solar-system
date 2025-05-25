@@ -30,8 +30,10 @@ export function initThreeJS() {
 
   // Add starfield background
   const starGeometry = new THREE.SphereGeometry(10000, 64, 64);
+  const starTexture = textureLoader.load("./images/8k_stars.jpg");
+  starTexture.colorSpace = THREE.SRGBColorSpace;
   const starMaterial = new THREE.MeshBasicMaterial({
-    map: createStarfieldTexture(2048, 1024, 2000),
+    map: starTexture,
     side: THREE.BackSide,
   });
   scene.add(new THREE.Mesh(starGeometry, starMaterial));
@@ -96,12 +98,13 @@ export function initThreeJS() {
 }
 
 /**
- * Create procedural starfield texture
+ * Create procedural starfield texture (DEPRECATED - now using 2k_stars.jpg texture file)
  * @param {number} width - Texture width
  * @param {number} height - Texture height
  * @param {number} numStars - Number of stars to generate
  * @returns {THREE.CanvasTexture} Generated starfield texture
  */
+/*
 export function createStarfieldTexture(width, height, numStars) {
   const canvas = document.createElement("canvas");
   canvas.width = width;
@@ -121,6 +124,7 @@ export function createStarfieldTexture(width, height, numStars) {
   }
   return new THREE.CanvasTexture(canvas);
 }
+*/
 
 /**
  * Handle window resize events

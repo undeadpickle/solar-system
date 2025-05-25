@@ -63,7 +63,7 @@
 
 ### Visual Enhancements
 
-- [x] 4.4.1 Starfield Background (Procedural)
+- [x] 4.4.1 Starfield Background (ENHANCED: Ultra high-resolution 8k_stars.jpg texture file replaced procedural generation)
 - [x] 4.4.2 Shadows (Sun's point light, 4096x4096 map)
 - [x] 4.4.3 Emissive Properties (Uranus, Neptune, Sun)
 - [x] 4.4.4 Sun Lens Flares (Multiple flare elements, distance-based intensity, toggle control)
@@ -84,7 +84,7 @@
   - [x] Extract Physics & Orbital Mechanics into `physics.js` ES6 module (Chunk 4 complete)
   - [ ] Error Handling for External Resources (Critical Fix #2 from assessment) - REVERTED: Initial async implementation caused compatibility issues, needs redesign without breaking synchronous texture loading
 - **Enhanced Texturing (PRD 7.1):**
-  - [x] Update all planet textures to use local 2k texture images (Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune) - improves performance and removes external dependencies
+  - [x] Update all planet textures to use local 2k texture images (Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon) - improves performance and removes external dependencies
   - [ ] Implement normal maps, bump maps, specular maps for more detailed surfaces.
   - [ ] Add textures for more moons (currently many use placeholders or base colors).
 - **Additional Celestial Bodies (PRD 7.2):**

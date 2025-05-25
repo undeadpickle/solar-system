@@ -104,7 +104,7 @@ export const solarSystemData = [
     type: "moon",
     radius: 1737.4,
     color: 0xcccccc,
-    textureUrl: "https://placehold.co/1024x512/CCCCCC/000000?text=Moon",
+    textureUrl: "./images/2k_moon.jpg",
     parent: "Earth",
     orbitalElements: {
       a: 384748,
