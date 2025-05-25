@@ -9,6 +9,31 @@ import {
 import { scene, objectLookup } from "./threeSetup.js";
 
 /**
+ * Creates a transformation matrix for moon orbits from ecliptic to parent planet's equatorial plane
+ * @param {Object} moonData - Moon data containing orbital elements
+ * @param {THREE.Mesh} parentPlanet - Parent planet object with userData.axialTilt
+ * @returns {THREE.Matrix4} Transformation matrix for moon's orbital plane
+ */
+export function getMoonOrbitMatrix(moonData, parentPlanet) {
+  const parentTilt = parentPlanet.userData.axialTilt || 0;
+  const parentRotation = parentPlanet.userData.currentRotation || 0;
+
+  // Transform moon's orbital elements from ecliptic to parent's equatorial plane
+  const tiltMatrix = new THREE.Matrix4().makeRotationX(
+    THREE.MathUtils.degToRad(parentTilt)
+  );
+  const rotationMatrix = new THREE.Matrix4().makeRotationY(parentRotation);
+
+  // Apply transformations
+  const combinedMatrix = new THREE.Matrix4().multiplyMatrices(
+    rotationMatrix,
+    tiltMatrix
+  );
+
+  return combinedMatrix;
+}
+
+/**
  * Creates a visual orbit path line for a celestial body
  * @param {number} scaled_a - Semi-major axis (scaled for visualization)
  * @param {number} e - Eccentricity
@@ -165,6 +190,30 @@ export function updateCelestialBody(
     let posY_ref_km = Py_ref * x_orb_km + Qy_ref * y_orb_km;
     let posZ_ref_km = Pz_ref * x_orb_km + Qz_ref * y_orb_km;
 
+    // Apply moon orbital transformation if this is a moon
+    if (data.type === "moon" && data.parent) {
+      const parentPlanetObject = objectLookup[data.parent];
+      if (parentPlanetObject) {
+        // Get the transformation matrix from ecliptic to parent's equatorial plane
+        const moonTransformMatrix = getMoonOrbitMatrix(
+          data,
+          parentPlanetObject
+        );
+
+        // Apply transformation to the calculated position
+        const eclipticPosition = new THREE.Vector3(
+          posX_ref_km,
+          posY_ref_km,
+          posZ_ref_km
+        );
+        eclipticPosition.applyMatrix4(moonTransformMatrix);
+
+        posX_ref_km = eclipticPosition.x;
+        posY_ref_km = eclipticPosition.y;
+        posZ_ref_km = eclipticPosition.z;
+      }
+    }
+
     // Scale to scene units and convert coordinate system
     let finalX = posX_ref_km * distanceScale;
     let finalY = posZ_ref_km * distanceScale;
@@ -254,16 +303,49 @@ export function addOrbitPath(data, bodyMesh) {
       Math.cos(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
     const Qz_ref = Math.cos(w_rad) * Math.sin(i_rad);
 
+    // Apply moon orbital transformation to P and Q vectors if this is a moon
+    let finalPx_ref = Px_ref,
+      finalPy_ref = Py_ref,
+      finalPz_ref = Pz_ref;
+    let finalQx_ref = Qx_ref,
+      finalQy_ref = Qy_ref,
+      finalQz_ref = Qz_ref;
+
+    if (data.type === "moon" && data.parent) {
+      const parentPlanetObject = objectLookup[data.parent];
+      if (parentPlanetObject) {
+        // Get the transformation matrix from ecliptic to parent's equatorial plane
+        const moonTransformMatrix = getMoonOrbitMatrix(
+          data,
+          parentPlanetObject
+        );
+
+        // Transform P vector
+        const P_vector = new THREE.Vector3(Px_ref, Py_ref, Pz_ref);
+        P_vector.applyMatrix4(moonTransformMatrix);
+        finalPx_ref = P_vector.x;
+        finalPy_ref = P_vector.y;
+        finalPz_ref = P_vector.z;
+
+        // Transform Q vector
+        const Q_vector = new THREE.Vector3(Qx_ref, Qy_ref, Qz_ref);
+        Q_vector.applyMatrix4(moonTransformMatrix);
+        finalQx_ref = Q_vector.x;
+        finalQy_ref = Q_vector.y;
+        finalQz_ref = Q_vector.z;
+      }
+    }
+
     // Create the orbit path
     const orbitPathGroup = createOrbitPathLine(
       scaled_a_for_orbit_path,
       oe.e,
-      Px_ref,
-      Py_ref,
-      Pz_ref,
-      Qx_ref,
-      Qy_ref,
-      Qz_ref
+      finalPx_ref,
+      finalPy_ref,
+      finalPz_ref,
+      finalQx_ref,
+      finalQy_ref,
+      finalQz_ref
     );
 
     // Add to scene hierarchy
