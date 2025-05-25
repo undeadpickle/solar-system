@@ -18,8 +18,7 @@ export const solarSystemData = [
     type: "star",
     radius: 695700,
     color: 0xffff00,
-    textureUrl:
-      "https://cdn.midjourney.com/47beddef-3e24-40a2-b2e8-ca74ca11bf3d/0_3.png",
+    textureUrl: "./images/2k_sun.jpg",
     rotationPeriod: 25.38 * 24,
     axialTilt: 7.25,
     parent: null,
@@ -36,8 +35,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 2439.7,
     color: 0x9c887a,
-    textureUrl:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtm2I1lHumy_WKA2NxtelfThSrDOI2wbR9kA&s",
+    textureUrl: "./images/2k_mercury.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 0.387098 * AU,
@@ -60,8 +58,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 6051.8,
     color: 0xd8c0a3,
-    textureUrl:
-      "https://cdn.midjourney.com/ca044d37-7ff7-46d5-9077-c7df7a2bc496/0_0.png",
+    textureUrl: "./images/2k_venus.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 0.723332 * AU,
@@ -84,8 +81,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 6371,
     color: 0x3399ff,
-    textureUrl:
-      "https://cdn.midjourney.com/5bbceaf6-d7b8-4c53-9e29-c766a36a7e9f/0_0.png",
+    textureUrl: "./images/2k_earth.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 1.0 * AU,
@@ -131,8 +127,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 3389.5,
     color: 0xc1440e,
-    textureUrl:
-      "https://cdn.midjourney.com/691e2b82-6c12-4d95-9988-fd227330e3d5/0_3.png",
+    textureUrl: "./images/2k_mars.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 1.523679 * AU,
@@ -191,8 +186,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 69911,
     color: 0xc8a060,
-    textureUrl:
-      "https://cdn.midjourney.com/3b11c291-27ba-4651-abb8-2ab02a8975ab/0_2.png",
+    textureUrl: "./images/2k_jupiter.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 5.2038 * AU,
@@ -291,8 +285,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 58232,
     color: 0xd0b080,
-    textureUrl:
-      "https://cdn.midjourney.com/4be2cf21-6b55-4c60-83d1-c5a7e24214b4/0_2.png",
+    textureUrl: "./images/2k_saturn.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 9.5826 * AU,
@@ -450,8 +443,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 25362,
     color: 0xa0d0d0,
-    textureUrl:
-      "https://cdn.midjourney.com/bc3a3b9c-8ee2-4fc4-a682-0ce3d9b3bd71/0_1.png",
+    textureUrl: "./images/2k_uranus.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 19.2184 * AU,
@@ -568,8 +560,7 @@ export const solarSystemData = [
     type: "planet",
     radius: 24622,
     color: 0x4060b0,
-    textureUrl:
-      "https://cdn.midjourney.com/82299c66-95ec-475f-b844-048b5c8e55e0/0_3.png",
+    textureUrl: "./images/2k_neptune.jpg",
     parent: "Sun",
     orbitalElements: {
       a: 30.11 * AU,

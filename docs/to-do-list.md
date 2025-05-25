@@ -82,7 +82,9 @@
   - [x] Extract Three.js setup into `threeSetup.js` ES6 module (Chunk 2 complete)
   - [x] Extract UI Controls into `uiControls.js` ES6 module (Chunk 3 complete)
   - [x] Extract Physics & Orbital Mechanics into `physics.js` ES6 module (Chunk 4 complete)
+  - [ ] Error Handling for External Resources (Critical Fix #2 from assessment) - REVERTED: Initial async implementation caused compatibility issues, needs redesign without breaking synchronous texture loading
 - **Enhanced Texturing (PRD 7.1):**
+  - [x] Update all planet textures to use local 2k texture images (Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune) - improves performance and removes external dependencies
   - [ ] Implement normal maps, bump maps, specular maps for more detailed surfaces.
   - [ ] Add textures for more moons (currently many use placeholders or base colors).
 - **Additional Celestial Bodies (PRD 7.2):**
