@@ -85,6 +85,8 @@
   - [ ] Error Handling for External Resources (Critical Fix #2 from assessment) - REVERTED: Initial async implementation caused compatibility issues, needs redesign without breaking synchronous texture loading
 - **Enhanced Texturing (PRD 7.1):**
   - [x] Update all planet textures to use local 2k texture images (Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon) - improves performance and removes external dependencies
+  - [x] Earth cloud layer implementation using 2k_earth_clouds.jpg with alpha mapping for transparency and atmospheric motion simulation
+  - [x] Saturn realistic ring system using stock_image\_\_\_saturn_rings_by_alpha_element_d6ifske.png with proper alpha mapping and correct UV mapping for concentric bands
   - [ ] Implement normal maps, bump maps, specular maps for more detailed surfaces.
   - [ ] Add textures for more moons (currently many use placeholders or base colors).
 - **Additional Celestial Bodies (PRD 7.2):**

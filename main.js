@@ -1014,65 +1014,154 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    // Create cloud layer for Earth
+    if (data.name === "Earth") {
+      const cloudTexture = textureLoader.load("./images/2k_earth_clouds.jpg");
+      cloudTexture.colorSpace = THREE.SRGBColorSpace;
+
+      const cloudRadius = scaledRadius * 1.01; // Slightly larger than Earth
+      const cloudGeometry = new THREE.SphereGeometry(cloudRadius, 64, 64);
+      const cloudMaterial = new THREE.MeshStandardMaterial({
+        alphaMap: cloudTexture,
+        transparent: true,
+        opacity: 0.8,
+        depthWrite: false, // Prevents z-fighting with Earth surface
+        blending: THREE.NormalBlending,
+      });
+
+      const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+      cloudMesh.name = "Earth Clouds";
+
+      // Add cloud layer to Earth's tilted pole group for proper rotation
+      tiltedPole.add(cloudMesh);
+
+      // Store cloud mesh reference for potential future controls
+      bodyMesh.userData.cloudMesh = cloudMesh;
+      bodyMesh.userData.initialCloudVisible = true;
+      bodyMesh.userData.cloudVisible = true;
+    }
+
     celestialObjects.push(bodyMesh);
     objectLookup[data.name] = bodyMesh;
 
     if (data.hasRings) {
       const innerR_scaled = data.ringInnerRadius * planetSizeScale;
       const outerR_scaled = data.ringOuterRadius * planetSizeScale;
-      const ringGeometry = new THREE.RingGeometry(
-        innerR_scaled,
-        outerR_scaled,
-        64
-      );
-      let ringOpacity =
-        data.initialRingOpacity !== undefined
-          ? data.initialRingOpacity
-          : data.name === "Jupiter" ||
-            data.name === "Uranus" ||
-            data.name === "Neptune"
-          ? 0.25
-          : 0.7;
 
-      bodyMesh.userData.initialRingOpacity = ringOpacity;
-
-      const ringCanvas = document.createElement("canvas");
-      ringCanvas.width = 256;
-      ringCanvas.height = 16;
-      const ringCtx = ringCanvas.getContext("2d");
-      const gradient = ringCtx.createLinearGradient(0, 0, ringCanvas.width, 0);
-      const baseRingColor = new THREE.Color(data.ringColor);
-      const alphaBase = ringOpacity * 0.6;
-      const alphaVariation = ringOpacity * 0.4;
-      for (let i = 0; i <= 10; i++) {
-        const pos = i / 10;
-        const alpha =
-          alphaBase +
-          (Math.random() - 0.3) * alphaVariation * (ringOpacity / 0.7);
-        gradient.addColorStop(
-          pos,
-          `rgba(${Math.floor(baseRingColor.r * 255)}, ${Math.floor(
-            baseRingColor.g * 255
-          )}, ${Math.floor(baseRingColor.b * 255)}, ${Math.max(
-            0,
-            Math.min(1, alpha)
-          )})`
+      // Enhanced ring implementation for Saturn with alpha texture
+      if (data.name === "Saturn") {
+        // Load Saturn's ring alpha texture
+        const ringTexture = textureLoader.load(
+          "./images/stock_image___saturn_rings_by_alpha_element_d6ifske.png",
+          undefined,
+          undefined,
+          (error) => {
+            console.error("Failed to load Saturn ring texture:", error);
+          }
         );
+
+        // Configure texture for concentric circular mapping
+        ringTexture.wrapS = THREE.RepeatWrapping;
+        ringTexture.wrapT = THREE.RepeatWrapping;
+        ringTexture.repeat.set(1, 1); // Display raw texture to debug UV mapping
+        ringTexture.anisotropy = Math.min(
+          8,
+          renderer.capabilities.getMaxAnisotropy()
+        );
+        ringTexture.colorSpace = THREE.SRGBColorSpace;
+
+        // Create flat ring geometry
+        const ringGeometry = new THREE.RingGeometry(
+          innerR_scaled,
+          outerR_scaled,
+          256, // High circumferential segments
+          1 // Single radial segment
+        );
+
+        let ringOpacity =
+          data.initialRingOpacity !== undefined ? data.initialRingOpacity : 0.9;
+        bodyMesh.userData.initialRingOpacity = ringOpacity;
+
+        // Create material with alpha texture for realistic transparency
+        const ringMaterial = new THREE.MeshBasicMaterial({
+          map: ringTexture,
+          alphaMap: ringTexture,
+          transparent: true,
+          opacity: ringOpacity,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+          fog: false,
+        });
+
+        const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+        ringMesh.name = data.name + " Rings";
+
+        // Rotate ring to lie in Saturn's equatorial plane
+        ringMesh.rotation.x = -Math.PI / 2;
+
+        bodyMesh.userData.ringMesh = ringMesh;
+        bodyMesh.userData.tiltedPole.add(ringMesh);
+      } else {
+        // Original procedural ring generation for other planets
+        const ringGeometry = new THREE.RingGeometry(
+          innerR_scaled,
+          outerR_scaled,
+          64
+        );
+        let ringOpacity =
+          data.initialRingOpacity !== undefined
+            ? data.initialRingOpacity
+            : data.name === "Jupiter" ||
+              data.name === "Uranus" ||
+              data.name === "Neptune"
+            ? 0.25
+            : 0.7;
+
+        bodyMesh.userData.initialRingOpacity = ringOpacity;
+
+        const ringCanvas = document.createElement("canvas");
+        ringCanvas.width = 256;
+        ringCanvas.height = 16;
+        const ringCtx = ringCanvas.getContext("2d");
+        const gradient = ringCtx.createLinearGradient(
+          0,
+          0,
+          ringCanvas.width,
+          0
+        );
+        const baseRingColor = new THREE.Color(data.ringColor);
+        const alphaBase = ringOpacity * 0.6;
+        const alphaVariation = ringOpacity * 0.4;
+        for (let i = 0; i <= 10; i++) {
+          const pos = i / 10;
+          const alpha =
+            alphaBase +
+            (Math.random() - 0.3) * alphaVariation * (ringOpacity / 0.7);
+          gradient.addColorStop(
+            pos,
+            `rgba(${Math.floor(baseRingColor.r * 255)}, ${Math.floor(
+              baseRingColor.g * 255
+            )}, ${Math.floor(baseRingColor.b * 255)}, ${Math.max(
+              0,
+              Math.min(1, alpha)
+            )})`
+          );
+        }
+        ringCtx.fillStyle = gradient;
+        ringCtx.fillRect(0, 0, ringCanvas.width, ringCanvas.height);
+        const ringTexture = new THREE.CanvasTexture(ringCanvas);
+        const ringMaterial = new THREE.MeshBasicMaterial({
+          map: ringTexture,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: ringOpacity,
+          fog: false,
+        });
+        const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
+        ringMesh.name = data.name + " Rings";
+        bodyMesh.userData.ringMesh = ringMesh;
+        bodyMesh.userData.tiltedPole.add(ringMesh);
       }
-      ringCtx.fillStyle = gradient;
-      ringCtx.fillRect(0, 0, ringCanvas.width, ringCanvas.height);
-      const ringTexture = new THREE.CanvasTexture(ringCanvas);
-      const ringMaterial = new THREE.MeshBasicMaterial({
-        map: ringTexture,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: ringOpacity,
-        fog: false,
-      });
-      const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
-      ringMesh.name = data.name + " Rings";
-      bodyMesh.userData.ringMesh = ringMesh;
-      bodyMesh.userData.tiltedPole.add(ringMesh);
     }
 
     if (data.orbitalElements && data.parent) {

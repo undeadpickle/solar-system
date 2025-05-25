@@ -120,6 +120,13 @@ export function updateCelestialBody(
       const rotationThisFrame =
         rotationSpeedRadPerDay * (clock.getDelta() * timeScale);
       data.tiltedPole.rotation.y += rotationThisFrame;
+
+      // Handle Earth cloud layer rotation (slightly faster than planet)
+      if (data.name === "Earth" && data.cloudMesh) {
+        const cloudRotationMultiplier = 5.0; // TESTING: Fast cloud rotation for visibility
+        data.cloudMesh.rotation.y +=
+          rotationThisFrame * cloudRotationMultiplier;
+      }
     }
   }
 

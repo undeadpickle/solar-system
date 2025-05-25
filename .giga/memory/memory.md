@@ -106,6 +106,8 @@
   - Replaced all external texture URLs (Midjourney, Google Images) with local ./images/ paths
   - Updated textures for: Sun, Mercury, Venus, Earth, Mars, Jupiter, Saturn, Uranus, Neptune, Moon
   - ADDED: Ultra high-resolution starfield background using 8k_stars.jpg texture file (upgraded from procedural generation)
+  - ADDED: Earth cloud layer using 2k_earth_clouds.jpg with realistic alpha mapping and atmospheric motion (clouds rotate 5% faster than Earth)
+  - ADDED: Saturn realistic ring system using stock_image\_\_\_saturn_rings_by_alpha_element_d6ifske.png with proper alpha mapping, high-resolution geometry (256 segments), and correct UV mapping (1,1 repeat for proper concentric bands)
   - Improves performance, reliability, and removes dependency on external services
   - High-quality 2k resolution textures provide enhanced visual detail
 - 🔴 **Critical Reliability Fix #2: Error Handling for External Resources** (December 2024):
