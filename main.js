@@ -144,6 +144,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let bloomPass = null;
   let bloomEnabled = true;
 
+  // Background music system
+  let backgroundMusic = null;
+  let musicEnabled = false;
+  let musicMuted = false;
+
   // --- UI Elements for Settings Panel ---
   const settingsPanel = document.getElementById("settingsPanel");
   const objectDetailsSection = document.getElementById("objectDetailsSection");
@@ -218,6 +223,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const orbitPathsGlobalToggle = document.getElementById(
     "orbitPathsGlobalToggle"
   );
+
+  // Background music controls
+  const backgroundMusicToggle = document.getElementById(
+    "backgroundMusicToggle"
+  );
+  const playPauseButton = document.getElementById("playPauseButton");
+  const muteButton = document.getElementById("muteButton");
 
   // Constants now imported from celestialBodyData.js
 
@@ -325,8 +337,22 @@ document.addEventListener("DOMContentLoaded", () => {
       // Bloom effects toggle
       bloomEffectsToggle.addEventListener("change", handleBloomEffectsToggle);
 
-      // Initialize bloom system
+      // Background music controls
+      backgroundMusicToggle.addEventListener(
+        "change",
+        handleBackgroundMusicToggle
+      );
+      playPauseButton.addEventListener("click", handlePlayPause);
+      muteButton.addEventListener("click", handleMute);
+
+      // Initialize systems
       setupBloomSystem();
+
+      // Set initial audio control states
+      backgroundMusicToggle.disabled = true; // Disabled until audio loads
+      updateAudioControls();
+
+      initBackgroundMusic();
 
       emissionSlider.addEventListener("input", (e) =>
         handleEmissionChange(e, settingsTargetObject, emissionValueDisplay)
@@ -886,6 +912,118 @@ document.addEventListener("DOMContentLoaded", () => {
       bloomPass.enabled = bloomEnabled;
     }
     console.log("Bloom effects:", bloomEnabled ? "enabled" : "disabled");
+  }
+
+  /**
+   * Initialize background music system
+   */
+  function initBackgroundMusic() {
+    try {
+      backgroundMusic = new Audio("./audio/Solaris Drone.mp3");
+      backgroundMusic.loop = true;
+      backgroundMusic.volume = 0.5; // Set to reasonable volume
+      backgroundMusic.preload = "auto";
+
+      // Add event listeners for audio events
+      backgroundMusic.addEventListener("loadeddata", () => {
+        console.log("✅ Background music loaded successfully");
+        // Enable controls once audio is loaded
+        backgroundMusicToggle.disabled = false;
+        updateAudioControls();
+      });
+
+      backgroundMusic.addEventListener("error", (e) => {
+        console.warn("⚠️ Failed to load background music:", e);
+        console.warn("Audio controls will be disabled");
+      });
+
+      backgroundMusic.addEventListener("ended", () => {
+        // This shouldn't happen with loop=true, but just in case
+        if (musicEnabled && !musicMuted) {
+          backgroundMusic
+            .play()
+            .catch((err) => console.warn("Audio play failed:", err));
+        }
+      });
+    } catch (error) {
+      console.warn("⚠️ Failed to initialize background music:", error);
+    }
+  }
+
+  /**
+   * Update audio control buttons state
+   */
+  function updateAudioControls() {
+    const canUseControls = backgroundMusic && musicEnabled;
+
+    playPauseButton.disabled = !canUseControls;
+    muteButton.disabled = !canUseControls;
+
+    if (canUseControls) {
+      const isPlaying = !backgroundMusic.paused;
+      playPauseButton.textContent = isPlaying ? "Pause" : "Play";
+      muteButton.textContent = musicMuted ? "Unmute" : "Mute";
+    } else {
+      playPauseButton.textContent = "Play";
+      muteButton.textContent = "Mute";
+    }
+  }
+
+  /**
+   * Handle background music toggle
+   * @param {Event} e - The toggle event
+   */
+  function handleBackgroundMusicToggle(e) {
+    musicEnabled = e.target.checked;
+
+    if (!backgroundMusic) {
+      initBackgroundMusic();
+      return;
+    }
+
+    if (musicEnabled && !musicMuted) {
+      // Start playing music
+      backgroundMusic.play().catch((err) => {
+        console.warn("Failed to play background music:", err);
+        console.warn("This might be due to browser autoplay policies");
+      });
+    } else {
+      // Stop playing music
+      backgroundMusic.pause();
+    }
+
+    updateAudioControls();
+    console.log("Background music:", musicEnabled ? "enabled" : "disabled");
+  }
+
+  /**
+   * Handle play/pause button
+   */
+  function handlePlayPause() {
+    if (!backgroundMusic || !musicEnabled) return;
+
+    if (backgroundMusic.paused) {
+      backgroundMusic.play().catch((err) => {
+        console.warn("Failed to play background music:", err);
+      });
+    } else {
+      backgroundMusic.pause();
+    }
+
+    updateAudioControls();
+  }
+
+  /**
+   * Handle mute button
+   */
+  function handleMute() {
+    if (!backgroundMusic || !musicEnabled) return;
+
+    musicMuted = !musicMuted;
+    backgroundMusic.muted = musicMuted;
+
+    updateAudioControls();
+    console.log("Background music:", musicMuted ? "muted" : "unmuted");
   }
 
   function createCelestialBody(data, sunLightRef) {
