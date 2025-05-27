@@ -61,29 +61,39 @@ An interactive 3D Solar System simulation built with Three.js that provides an e
 
 2. **Set up local development server**
 
-   **Option A: VS Code Live Server (Recommended)**
+   **⚠️ Important: Live Server Required for ES6 Modules**
+
+   This project uses ES6 modules which require an HTTP server (not file:// protocol) due to CORS restrictions.
+
+   **Option A: Cursor Live Server (Recommended for Development)**
+
+   - Install the "Live Server" extension in Cursor IDE
+   - Right-click on `solarsystem.html` and select "Open with Live Server"
+   - Navigate to `http://127.0.0.1:5500/solarsystem.html`
+
+   **Option B: VS Code Live Server**
 
    - Install the "Live Server" extension in VS Code
    - Right-click on `solarsystem.html` and select "Open with Live Server"
 
-   **Option B: Python HTTP Server**
+   **Option C: Python HTTP Server**
 
    ```bash
    # Python 3
-   python -m http.server 8000
+   python -m http.server 5500
 
    # Python 2
-   python -m SimpleHTTPServer 8000
+   python -m SimpleHTTPServer 5500
    ```
 
-   **Option C: Node.js HTTP Server**
+   **Option D: Node.js HTTP Server**
 
    ```bash
-   npx http-server .
+   npx http-server . -p 5500
    ```
 
 3. **Open in browser**
-   - Navigate to `http://localhost:8000/solarsystem.html` (or the port shown by your server)
+   - Navigate to `http://127.0.0.1:5500/solarsystem.html` (Live Server default) or the port shown by your server
 
 ### Quick Start
 
@@ -140,8 +150,9 @@ solar-system/
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **3D Graphics**: Three.js (r128)
 - **Architecture**: Modular ES6 structure with separated concerns
+- **Development**: Cursor IDE with Live Server extension (required for ES6 modules)
+- **Testing**: http://127.0.0.1:5500/solarsystem.html
 - **Performance**: Optimized for desktop browsers
-- **Development**: VS Code with Live Server extension
 
 ## 🎯 Educational Goals
 

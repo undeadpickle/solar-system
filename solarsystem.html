@@ -171,6 +171,26 @@
             border-top: 1px solid #333;
           "
         >
+          <div class="setting-item">
+            <label for="bodySizeSlider">Celestial Body Size:</label>
+            <input
+              type="range"
+              id="bodySizeSlider"
+              min="0"
+              max="100"
+              step="1"
+              value="50"
+            />
+            <span id="bodySizeValue" class="slider-value">5.0x</span>
+          </div>
+        </div>
+        <div
+          style="
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+          "
+        >
           <input type="checkbox" id="backgroundMusicToggle" />
           <label for="backgroundMusicToggle" class="checkbox-label"
             >Background Music</label

@@ -149,6 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let musicEnabled = false;
   let musicMuted = false;
 
+  // Celestial body scaling system
+  let bodySizeScale = 5.0; // Current global scale multiplier
+
   // --- UI Elements for Settings Panel ---
   const settingsPanel = document.getElementById("settingsPanel");
   const objectDetailsSection = document.getElementById("objectDetailsSection");
@@ -230,6 +233,10 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const playPauseButton = document.getElementById("playPauseButton");
   const muteButton = document.getElementById("muteButton");
+
+  // Celestial body size controls
+  const bodySizeSlider = document.getElementById("bodySizeSlider");
+  const bodySizeValueDisplay = document.getElementById("bodySizeValue");
 
   // Constants now imported from celestialBodyData.js
 
@@ -345,6 +352,9 @@ document.addEventListener("DOMContentLoaded", () => {
       playPauseButton.addEventListener("click", handlePlayPause);
       muteButton.addEventListener("click", handleMute);
 
+      // Celestial body size control
+      bodySizeSlider.addEventListener("input", handleBodySizeChange);
+
       // Initialize systems
       setupBloomSystem();
 
@@ -401,6 +411,10 @@ document.addEventListener("DOMContentLoaded", () => {
             focusAnimationId = result.focusAnimationId;
           }
         });
+
+      // Apply initial 5x scaling to all celestial bodies
+      updateAllBodySizes();
+      console.log("Applied initial 5x scaling to all celestial bodies.");
 
       console.log("init() completed successfully.");
     } catch (e) {
@@ -1026,6 +1040,210 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("Background music:", musicMuted ? "muted" : "unmuted");
   }
 
+  /**
+   * Handle celestial body size scaling
+   * @param {Event} e - The slider input event
+   */
+  function handleBodySizeChange(e) {
+    const sliderValue = parseFloat(e.target.value);
+    // Linear mapping: 0→1x, 100→10x
+    bodySizeScale = 1 + (sliderValue / 100) * 9;
+
+    // Update display
+    bodySizeValueDisplay.textContent = `${bodySizeScale.toFixed(1)}x`;
+
+    // Apply scaling to all celestial bodies
+    updateAllBodySizes();
+
+    console.log(
+      `Celestial body size scale updated to: ${bodySizeScale.toFixed(1)}x`
+    );
+  }
+
+  /**
+   * Update the size of all celestial bodies based on current scale
+   */
+  function updateAllBodySizes() {
+    celestialObjects.forEach((bodyMesh) => {
+      if (!bodyMesh.userData || !bodyMesh.userData.originalRadius) return;
+
+      const originalRadius = bodyMesh.userData.originalRadius;
+      const newRadius = originalRadius * bodySizeScale;
+
+      // Store current scale for future calculations
+      bodyMesh.userData.currentScale = bodySizeScale;
+
+      // Update mesh geometry
+      if (bodyMesh.geometry) {
+        bodyMesh.geometry.dispose();
+
+        const segments =
+          bodyMesh.userData.type === "moon"
+            ? 16
+            : bodyMesh.userData.type === "asteroid"
+            ? 8
+            : bodyMesh.userData.radius > 20000
+            ? 64
+            : 32;
+
+        bodyMesh.geometry = new THREE.SphereGeometry(
+          newRadius,
+          segments,
+          segments
+        );
+      }
+
+      // Update stored scaled radius
+      bodyMesh.userData.scaledRadius = newRadius;
+
+      // Update rings if present
+      if (bodyMesh.userData.ringMesh) {
+        updateRingScale(bodyMesh, bodySizeScale);
+      }
+
+      // Update lens flare if present (Sun)
+      if (
+        bodyMesh.userData.lensFlareGroup &&
+        bodyMesh.userData.type === "star"
+      ) {
+        updateLensFlareScale(bodyMesh, bodySizeScale);
+      }
+
+      // Update atmospheric glow if present
+      if (bodyMesh.userData.atmosphereGroup) {
+        updateAtmosphereScale(bodyMesh, bodySizeScale);
+      }
+
+      // Update cloud layer if present (Earth)
+      if (bodyMesh.userData.cloudMesh) {
+        updateCloudScale(bodyMesh, bodySizeScale);
+      }
+    });
+
+    // Update moon orbital distances to maintain visual gaps
+    updateMoonOrbitalDistances();
+  }
+
+  /**
+   * Update ring system scale for a planet
+   * @param {THREE.Mesh} planetMesh - The planet mesh with rings
+   * @param {number} scale - The new scale factor
+   */
+  function updateRingScale(planetMesh, scale) {
+    const ringMesh = planetMesh.userData.ringMesh;
+    if (!ringMesh) return;
+
+    const originalInnerRadius = planetMesh.userData.originalRingInnerRadius;
+    const originalOuterRadius = planetMesh.userData.originalRingOuterRadius;
+
+    const newInnerRadius = originalInnerRadius * scale;
+    const newOuterRadius = originalOuterRadius * scale;
+
+    // Update ring geometry
+    ringMesh.geometry.dispose();
+    const segments = planetMesh.userData.name === "Saturn" ? 256 : 64;
+    ringMesh.geometry = new THREE.RingGeometry(
+      newInnerRadius,
+      newOuterRadius,
+      segments
+    );
+  }
+
+  /**
+   * Update lens flare scale for the Sun
+   * @param {THREE.Mesh} sunMesh - The Sun mesh
+   * @param {number} scale - The new scale factor
+   */
+  function updateLensFlareScale(sunMesh, scale) {
+    const lensFlareGroup = sunMesh.userData.lensFlareGroup;
+    if (!lensFlareGroup) return;
+
+    const baseRadius = sunMesh.userData.originalRadius;
+
+    lensFlareGroup.children.forEach((flareMesh, index) => {
+      // Scale lens flare elements based on new sun size
+      const flareElements = [
+        { size: baseRadius * 4 * scale },
+        { size: baseRadius * 1.5 * scale },
+        { size: baseRadius * 0.8 * scale },
+        { size: baseRadius * 0.6 * scale },
+        { size: baseRadius * 1.2 * scale },
+        { size: baseRadius * 0.4 * scale },
+      ];
+
+      if (flareElements[index]) {
+        const newSize = flareElements[index].size;
+        flareMesh.geometry.dispose();
+        flareMesh.geometry = new THREE.PlaneGeometry(newSize, newSize);
+      }
+    });
+  }
+
+  /**
+   * Update atmospheric glow scale for gas giants
+   * @param {THREE.Mesh} planetMesh - The planet mesh
+   * @param {number} scale - The new scale factor
+   */
+  function updateAtmosphereScale(planetMesh, scale) {
+    const atmosphereGroup = planetMesh.userData.atmosphereGroup;
+    if (!atmosphereGroup) return;
+
+    const baseRadius = planetMesh.userData.originalRadius;
+
+    // Update each atmosphere layer
+    atmosphereGroup.children.forEach((atmosphereMesh, index) => {
+      const scaleFactors = [0.95, 1.4, 1.45]; // inner, main, rim layers
+      const newRadius = baseRadius * scaleFactors[index] * scale;
+
+      atmosphereMesh.geometry.dispose();
+      atmosphereMesh.geometry = new THREE.SphereGeometry(newRadius, 32, 32);
+    });
+  }
+
+  /**
+   * Update cloud layer scale for Earth
+   * @param {THREE.Mesh} earthMesh - The Earth mesh
+   * @param {number} scale - The new scale factor
+   */
+  function updateCloudScale(earthMesh, scale) {
+    const cloudMesh = earthMesh.userData.cloudMesh;
+    if (!cloudMesh) return;
+
+    const baseRadius = earthMesh.userData.originalRadius;
+    const newCloudRadius = baseRadius * 1.01 * scale; // Slightly larger than Earth
+
+    cloudMesh.geometry.dispose();
+    cloudMesh.geometry = new THREE.SphereGeometry(newCloudRadius, 64, 64);
+  }
+
+  /**
+   * Update moon orbital distances to maintain visual gaps
+   */
+  function updateMoonOrbitalDistances() {
+    celestialObjects.forEach((bodyMesh) => {
+      if (bodyMesh.userData.type === "moon" && bodyMesh.userData.parent) {
+        const parentPlanetMesh = objectLookup[bodyMesh.userData.parent];
+        if (!parentPlanetMesh) return;
+
+        const parentRadius = parentPlanetMesh.userData.scaledRadius;
+        const moonRadius = bodyMesh.userData.scaledRadius;
+        const newOrbitalDistance =
+          parentRadius + moonRadius + MOON_VISUAL_ORBIT_GAP;
+
+        // Update the moon's orbital position (this maintains the visual gap)
+        // The actual orbital mechanics will be handled by the existing physics system
+        // We just need to ensure the visual distance is maintained
+        if (bodyMesh.userData.pivot) {
+          const currentDistance = bodyMesh.userData.pivot.position.length();
+          if (currentDistance > 0) {
+            const scale = newOrbitalDistance / currentDistance;
+            bodyMesh.userData.pivot.position.multiplyScalar(scale);
+          }
+        }
+      }
+    });
+  }
+
   function createCelestialBody(data, sunLightRef) {
     let geometry;
     let material;
@@ -1151,6 +1369,8 @@ document.addEventListener("DOMContentLoaded", () => {
     bodyMesh.userData = {
       ...data,
       scaledRadius: scaledRadius,
+      originalRadius: scaledRadius, // Store original radius for scaling
+      currentScale: 1.0, // Track current scale applied
       initialTextureUrl: data.textureUrl || null,
       initialEmissiveIntensity:
         material.emissiveIntensity !== undefined
@@ -1380,6 +1600,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         bodyMesh.userData.ringMesh = ringMesh;
+        bodyMesh.userData.originalRingInnerRadius = innerR_scaled;
+        bodyMesh.userData.originalRingOuterRadius = outerR_scaled;
         bodyMesh.userData.tiltedPole.add(ringMesh);
       } else {
         // Original procedural ring generation for other planets
@@ -1440,6 +1662,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const ringMesh = new THREE.Mesh(ringGeometry, ringMaterial);
         ringMesh.name = data.name + " Rings";
         bodyMesh.userData.ringMesh = ringMesh;
+        bodyMesh.userData.originalRingInnerRadius = innerR_scaled;
+        bodyMesh.userData.originalRingOuterRadius = outerR_scaled;
         bodyMesh.userData.tiltedPole.add(ringMesh);
       }
     }

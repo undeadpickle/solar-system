@@ -1,5 +1,11 @@
 ## Solar System Simulation: Feature To-Do List
 
+**🚀 Development Setup:**
+
+- **REQUIRED**: Use Cursor IDE with Live Server extension for testing
+- **Testing URL**: http://127.0.0.1:5500/solarsystem.html
+- **Why**: ES6 modules require HTTP server due to CORS restrictions (not file:// protocol)
+
 **Legend:**
 
 - [x] Completed
@@ -58,6 +64,8 @@
     - [x] Ring Opacity Slider (within collapsible section, for ringed planets)
     - [x] Reset Object Settings Button (within collapsible section, resets all relevant properties including orbit path & ring opacity)
 - [x] 4.3.6 Global Visual Effects Controls (Bloom effects, atmospheric glow, asteroid belt, and orbit paths toggles consolidated in time control panel for scene-wide management)
+- [x] 4.3.7 Global Celestial Body Scaling (Linear scaling slider 1x-10x for all celestial bodies, rings, atmospheric effects, and lens flares with moon orbital gap preservation)
+  - [x] Default 5x Scaling Implementation (Updated default scale to 5x with slider at halfway point)
 
 ---
 

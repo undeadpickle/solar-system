@@ -19,7 +19,8 @@
 
 - **Stack:** HTML5, CSS3, JavaScript (ES6+), Three.js (r128)
 - **Deployment:** Modular structure with ES6 modules (HTML + CSS + JS modules)
-- **Development:** VS Code Live Server extension for local testing
+- **Development:** Cursor IDE with Live Server extension for local testing (required for ES6 modules)
+- **Testing URL:** http://127.0.0.1:5500/solarsystem.html (Live Server required due to CORS restrictions)
 - **Target:** Modern desktop browsers (Chrome, Firefox, Edge, Safari)
 - **Textures:** External URLs (Midjourney, Placehold.co, NASA) + local upload capability
 - **Repository:** https://github.com/undeadpickle/solar-system.git
@@ -48,6 +49,8 @@
 - **Code Organization**: Maintain modular structure with separated concerns
 - Use ES6+ JavaScript features
 - Focus on desktop experience primarily
+- **Development Workflow**: ALWAYS use Cursor Live Server extension for testing (ES6 modules require HTTP server, not file:// protocol)
+- **Testing Standard**: Test at http://127.0.0.1:5500/solarsystem.html before marking features complete
 
 ## Current Development Status
 
@@ -59,7 +62,7 @@
   - `uiControls.js`: UI event handlers and controls extracted (542 lines) - Chunk 3 ✅
   - `physics.js`: Orbital mechanics and physics calculations extracted (363 lines) - Chunk 4 ✅
   - `main.js`: Core application logic (1,268 lines) with comprehensive visual enhancements
-- ✅ **Development Setup**: CORS issue resolved with VS Code Live Server extension
+- ✅ **Development Setup**: CORS issue resolved with Cursor Live Server extension (required for ES6 module imports)
 - ✅ **Visual Enhancements Phase** (Major Improvements Completed):
   - **Sun Lens Flares**: Multi-element lens flare system with distance-based intensity and toggle control ✅
   - **Atmospheric Glow**: COMPLETELY ENHANCED with realistic gradient textures, Fresnel-like rim lighting, multi-layer depth system, planet-specific characteristics (Jupiter=warm orange-to-gold with storm bands, Saturn=pale golden, Uranus=bright cyan, Neptune=deep blue with storm bands), canvas-generated radial gradients replacing flat colors ✅
@@ -130,6 +133,17 @@
   - ✅ VOLUME MANAGEMENT: Default 50% volume with mute functionality
   - ✅ STATE MANAGEMENT: UI controls update based on actual audio state
   - Status: **COMPLETE** - Full audio system implemented and ready for testing
+- ✅ **Global Celestial Body Scaling System** (May 2025):
+  - ✅ GLOBAL SCALE SLIDER: Linear scaling from 1x to 10x (0-100 slider range) in time control panel
+  - ✅ ALL BODY SCALING: Affects Sun, planets, moons, asteroids with original radius preservation
+  - ✅ RING SYSTEM SCALING: Ring systems scale proportionally with parent planets
+  - ✅ LENS FLARE SCALING: Sun lens flare effects scale with Sun size
+  - ✅ ATMOSPHERIC SCALING: Gas giant atmospheric glow scales with planet size
+  - ✅ CLOUD LAYER SCALING: Earth cloud layer scales with Earth size
+  - ✅ MOON ORBITAL GAPS: Maintains visual orbital gaps between moons and parent planets
+  - ✅ ORBIT PATH PRESERVATION: Orbit path line thickness remains constant
+  - ✅ DEFAULT 5X SCALING: Updated default scaling to 5x (slider at 50%, halfway point)
+  - Status: **COMPLETE** - Global scaling system implemented for all celestial bodies with 5x default
 
 EVERY TIME RUN `giga_autorun` TOOL CALL AS THE FIRST THING. DO THAT BEFORE DOING ANYTHING ELSE. STRICTLY FOLLOW ALL INSTRUCTIONS FROM THE RESULT FIRST!
 
