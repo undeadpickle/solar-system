@@ -69,6 +69,55 @@ export const minVisualRadius = 0.05;
 export const MOON_MIN_VISUAL_RADIUS = 0.08;
 export const MOON_VISUAL_ORBIT_GAP = 0.05;
 
+// --- VISUAL CONFIGURATION ---
+// Centralized magic numbers for tuning visuals without hunting through code
+export const VISUAL_CONFIG = {
+  bloom: {
+    strength: 0.3,
+    radius: 0.2,
+    threshold: 0.9,
+  },
+  audio: {
+    defaultVolume: 0.5,
+  },
+  bodySize: {
+    initialSliderValue: 50,  // maps to 5x via formula
+    minScale: 1,
+    maxScale: 10,
+  },
+  geometry: {
+    segments: {
+      planet: 64,        // radius > 20000 km
+      smallPlanet: 32,   // radius <= 20000 km
+      moon: 16,
+      asteroid: 8,
+      ring: {
+        saturn: 256,     // high-detail textured ring
+        other: 64,       // procedural rings
+      },
+    },
+  },
+  camera: {
+    fov: 45,
+    near: 0.1,
+    far: 20000,
+    maxOrbitDistance: 15000,
+    dampingFactor: 0.05,
+  },
+  lighting: {
+    sunIntensity: 1.8,
+    sunDecay: 2,
+    sunShadowMapSize: 4096,
+    sunShadowBias: -0.0001,
+    ambientColor: 0x404040,
+    ambientIntensity: 0.5,
+  },
+  starfield: {
+    radiusFactor: 0.9,  // multiplied by camera.far
+    segments: 64,
+  },
+};
+
 // --- CELESTIAL BODY DATA ---
 export const solarSystemData = [
   {

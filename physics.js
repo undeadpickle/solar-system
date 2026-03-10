@@ -33,6 +33,33 @@ export function getMoonOrbitMatrix(moonData, parentPlanet) {
   return combinedMatrix;
 }
 
+// Pre-allocated reusable objects to avoid per-frame GC pressure
+const _tempVec3 = new THREE.Vector3();
+const _tempVec3b = new THREE.Vector3();
+const _rotMatrix = { Px: 0, Py: 0, Pz: 0, Qx: 0, Qy: 0, Qz: 0 };
+
+/**
+ * Calculates the orbital rotation matrix elements from orbital angles.
+ * Writes results into the provided output object to avoid allocation.
+ * @param {number} w_rad - Argument of perihelion in radians
+ * @param {number} Omega_rad - Longitude of ascending node in radians
+ * @param {number} i_rad - Inclination in radians
+ * @param {Object} out - Output object with Px, Py, Pz, Qx, Qy, Qz properties
+ * @returns {Object} The output object (same reference as `out`)
+ */
+function calculateRotationMatrix(w_rad, Omega_rad, i_rad, out) {
+  const cosW = Math.cos(w_rad), sinW = Math.sin(w_rad);
+  const cosO = Math.cos(Omega_rad), sinO = Math.sin(Omega_rad);
+  const cosI = Math.cos(i_rad), sinI = Math.sin(i_rad);
+  out.Px = cosW * cosO - sinW * sinO * cosI;
+  out.Py = cosW * sinO + sinW * cosO * cosI;
+  out.Pz = sinW * sinI;
+  out.Qx = -sinW * cosO - cosW * sinO * cosI;
+  out.Qy = -sinW * sinO + cosW * cosO * cosI;
+  out.Qz = cosW * sinI;
+  return out;
+}
+
 /**
  * Creates a visual orbit path line for a celestial body
  * @param {number} scaled_a - Semi-major axis (scaled for visualization)
@@ -123,7 +150,7 @@ export function updateCelestialBody(
 
       // Handle Earth cloud layer rotation (slightly faster than planet)
       if (data.name === "Earth" && data.cloudMesh) {
-        const cloudRotationMultiplier = 5.0; // TESTING: Fast cloud rotation for visibility
+        const cloudRotationMultiplier = 5.0; // Faster than planet for visible atmospheric motion
         data.cloudMesh.rotation.y +=
           rotationThisFrame * cloudRotationMultiplier;
       }
@@ -177,25 +204,12 @@ export function updateCelestialBody(
     const w_rad = THREE.MathUtils.degToRad(oe.w);
 
     // Calculate rotation matrix elements
-    const Px_ref =
-      Math.cos(w_rad) * Math.cos(Omega_rad) -
-      Math.sin(w_rad) * Math.sin(Omega_rad) * Math.cos(i_rad);
-    const Py_ref =
-      Math.cos(w_rad) * Math.sin(Omega_rad) +
-      Math.sin(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
-    const Pz_ref = Math.sin(w_rad) * Math.sin(i_rad);
-    const Qx_ref =
-      -Math.sin(w_rad) * Math.cos(Omega_rad) -
-      Math.cos(w_rad) * Math.sin(Omega_rad) * Math.cos(i_rad);
-    const Qy_ref =
-      -Math.sin(w_rad) * Math.sin(Omega_rad) +
-      Math.cos(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
-    const Qz_ref = Math.cos(w_rad) * Math.sin(i_rad);
+    calculateRotationMatrix(w_rad, Omega_rad, i_rad, _rotMatrix);
 
     // Calculate position in reference frame
-    let posX_ref_km = Px_ref * x_orb_km + Qx_ref * y_orb_km;
-    let posY_ref_km = Py_ref * x_orb_km + Qy_ref * y_orb_km;
-    let posZ_ref_km = Pz_ref * x_orb_km + Qz_ref * y_orb_km;
+    let posX_ref_km = _rotMatrix.Px * x_orb_km + _rotMatrix.Qx * y_orb_km;
+    let posY_ref_km = _rotMatrix.Py * x_orb_km + _rotMatrix.Qy * y_orb_km;
+    let posZ_ref_km = _rotMatrix.Pz * x_orb_km + _rotMatrix.Qz * y_orb_km;
 
     // Apply moon orbital transformation if this is a moon
     if (data.type === "moon" && data.parent) {
@@ -208,16 +222,12 @@ export function updateCelestialBody(
         );
 
         // Apply transformation to the calculated position
-        const eclipticPosition = new THREE.Vector3(
-          posX_ref_km,
-          posY_ref_km,
-          posZ_ref_km
-        );
-        eclipticPosition.applyMatrix4(moonTransformMatrix);
+        _tempVec3.set(posX_ref_km, posY_ref_km, posZ_ref_km);
+        _tempVec3.applyMatrix4(moonTransformMatrix);
 
-        posX_ref_km = eclipticPosition.x;
-        posY_ref_km = eclipticPosition.y;
-        posZ_ref_km = eclipticPosition.z;
+        posX_ref_km = _tempVec3.x;
+        posY_ref_km = _tempVec3.y;
+        posZ_ref_km = _tempVec3.z;
       }
     }
 
@@ -234,7 +244,7 @@ export function updateCelestialBody(
         parentPlanetVisualRadius = parentPlanetObject.userData.scaledRadius;
       }
       const moonOwnVisualRadius = data.scaledRadius;
-      const direction = new THREE.Vector3(finalX, finalY, finalZ).normalize();
+      const direction = _tempVec3.set(finalX, finalY, finalZ).normalize();
       if (direction.lengthSq() === 0) {
         direction.set(1, 0, 0);
       }
@@ -295,47 +305,32 @@ export function addOrbitPath(data, bodyMesh) {
     const i_rad = THREE.MathUtils.degToRad(oe.i);
     const Omega_rad = THREE.MathUtils.degToRad(oe.Omega);
     const w_rad = THREE.MathUtils.degToRad(oe.w);
-    const Px_ref =
-      Math.cos(w_rad) * Math.cos(Omega_rad) -
-      Math.sin(w_rad) * Math.sin(Omega_rad) * Math.cos(i_rad);
-    const Py_ref =
-      Math.cos(w_rad) * Math.sin(Omega_rad) +
-      Math.sin(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
-    const Pz_ref = Math.sin(w_rad) * Math.sin(i_rad);
-    const Qx_ref =
-      -Math.sin(w_rad) * Math.cos(Omega_rad) -
-      Math.cos(w_rad) * Math.sin(Omega_rad) * Math.cos(i_rad);
-    const Qy_ref =
-      -Math.sin(w_rad) * Math.sin(Omega_rad) +
-      Math.cos(w_rad) * Math.cos(Omega_rad) * Math.cos(i_rad);
-    const Qz_ref = Math.cos(w_rad) * Math.sin(i_rad);
+    const rm = calculateRotationMatrix(w_rad, Omega_rad, i_rad, { Px: 0, Py: 0, Pz: 0, Qx: 0, Qy: 0, Qz: 0 });
 
     // Apply moon orbital transformation to P and Q vectors if this is a moon
-    let finalPx_ref = Px_ref,
-      finalPy_ref = Py_ref,
-      finalPz_ref = Pz_ref;
-    let finalQx_ref = Qx_ref,
-      finalQy_ref = Qy_ref,
-      finalQz_ref = Qz_ref;
+    let finalPx_ref = rm.Px,
+      finalPy_ref = rm.Py,
+      finalPz_ref = rm.Pz;
+    let finalQx_ref = rm.Qx,
+      finalQy_ref = rm.Qy,
+      finalQz_ref = rm.Qz;
 
     if (data.type === "moon" && data.parent) {
       const parentPlanetObject = objectLookup[data.parent];
       if (parentPlanetObject) {
-        // Get the transformation matrix from ecliptic to parent's equatorial plane
         const moonTransformMatrix = getMoonOrbitMatrix(
           data,
           parentPlanetObject
         );
 
-        // Transform P vector
-        const P_vector = new THREE.Vector3(Px_ref, Py_ref, Pz_ref);
+        // Transform P and Q vectors
+        const P_vector = new THREE.Vector3(rm.Px, rm.Py, rm.Pz);
         P_vector.applyMatrix4(moonTransformMatrix);
         finalPx_ref = P_vector.x;
         finalPy_ref = P_vector.y;
         finalPz_ref = P_vector.z;
 
-        // Transform Q vector
-        const Q_vector = new THREE.Vector3(Qx_ref, Qy_ref, Qz_ref);
+        const Q_vector = new THREE.Vector3(rm.Qx, rm.Qy, rm.Qz);
         Q_vector.applyMatrix4(moonTransformMatrix);
         finalQx_ref = Q_vector.x;
         finalQy_ref = Q_vector.y;

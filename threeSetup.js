@@ -10,6 +10,7 @@ import {
   MOON_VISUAL_ORBIT_GAP,
   solarSystemData,
   initialCameraPosition,
+  VISUAL_CONFIG,
 } from "./celestialBodyData.js";
 
 // Global Three.js objects that will be accessed from main.js
@@ -153,10 +154,10 @@ export function initThreeJS() {
 
   // Create camera first (needed for starfield sizing)
   camera = new THREE.PerspectiveCamera(
-    45,
+    VISUAL_CONFIG.camera.fov,
     window.innerWidth / window.innerHeight,
-    0.1,
-    20000
+    VISUAL_CONFIG.camera.near,
+    VISUAL_CONFIG.camera.far
   );
   camera.position.set(
     initialCameraPosition.x,
@@ -166,7 +167,11 @@ export function initThreeJS() {
   camera.lookAt(0, 0, 0);
 
   // Now create starfield background (after camera exists)
-  const starGeometry = new THREE.SphereGeometry(camera.far * 0.9, 64, 64);
+  const starGeometry = new THREE.SphereGeometry(
+    camera.far * VISUAL_CONFIG.starfield.radiusFactor,
+    VISUAL_CONFIG.starfield.segments,
+    VISUAL_CONFIG.starfield.segments
+  );
 
   // Create starfield material first
   const starMaterial = new THREE.MeshBasicMaterial({
@@ -202,16 +207,16 @@ export function initThreeJS() {
   document.body.appendChild(renderer.domElement);
 
   // Create lighting
-  const sunLight = new THREE.PointLight(0xffffff, 1.8, 0, 2);
+  const sunLight = new THREE.PointLight(0xffffff, VISUAL_CONFIG.lighting.sunIntensity, 0, VISUAL_CONFIG.lighting.sunDecay);
   sunLight.castShadow = true;
-  sunLight.shadow.mapSize.width = 4096;
-  sunLight.shadow.mapSize.height = 4096;
-  sunLight.shadow.bias = -0.0001;
+  sunLight.shadow.mapSize.width = VISUAL_CONFIG.lighting.sunShadowMapSize;
+  sunLight.shadow.mapSize.height = VISUAL_CONFIG.lighting.sunShadowMapSize;
+  sunLight.shadow.bias = VISUAL_CONFIG.lighting.sunShadowBias;
   sunLight.shadow.camera.near = 0.5;
   sunLight.shadow.camera.far = distanceScaleFactor * 50;
   scene.add(sunLight);
 
-  const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+  const ambientLight = new THREE.AmbientLight(VISUAL_CONFIG.lighting.ambientColor, VISUAL_CONFIG.lighting.ambientIntensity);
   scene.add(ambientLight);
 
   // Create orbit controls
@@ -219,9 +224,9 @@ export function initThreeJS() {
     orbitControls = new THREE.OrbitControls(camera, renderer.domElement);
     orbitControls.target.set(0, 0, 0);
     orbitControls.enableDamping = true;
-    orbitControls.dampingFactor = 0.05;
-    orbitControls.minDistance = 0.1;
-    orbitControls.maxDistance = 15000;
+    orbitControls.dampingFactor = VISUAL_CONFIG.camera.dampingFactor;
+    orbitControls.minDistance = VISUAL_CONFIG.camera.near;
+    orbitControls.maxDistance = VISUAL_CONFIG.camera.maxOrbitDistance;
   } else {
     console.warn("THREE.OrbitControls not found.");
   }

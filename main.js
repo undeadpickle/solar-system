@@ -15,6 +15,7 @@ import {
   ASTEROID_BELT_CONFIG,
   generateAsteroidBelt,
   RING_SYSTEMS,
+  VISUAL_CONFIG,
 } from "./celestialBodyData.js";
 
 import {
@@ -136,8 +137,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let totalSimulatedTimeDays = 0;
   let timeScale = 1;
   let isPaused = false;
-  let animationFrameCounter = 0;
-
   // Bloom post-processing system
   let composer = null;
   let renderPass = null;
@@ -889,9 +888,7 @@ document.addEventListener("DOMContentLoaded", () => {
     composer.addPass(renderPass);
 
     // Add bloom pass
-    const bloomStrength = 0.3; // Intensity of bloom (reduced from 1.5)
-    const bloomRadius = 0.2; // Spread of bloom (reduced from 0.4)
-    const bloomThreshold = 0.9; // Brightness threshold for bloom (increased from 0.85)
+    const { strength: bloomStrength, radius: bloomRadius, threshold: bloomThreshold } = VISUAL_CONFIG.bloom;
 
     bloomPass = new THREE.UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
@@ -935,7 +932,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       backgroundMusic = new Audio("./audio/Solaris Drone.mp3");
       backgroundMusic.loop = true;
-      backgroundMusic.volume = 0.5; // Set to reasonable volume
+      backgroundMusic.volume = VISUAL_CONFIG.audio.defaultVolume;
       backgroundMusic.preload = "auto";
 
       // Add event listeners for audio events
@@ -1046,8 +1043,8 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function handleBodySizeChange(e) {
     const sliderValue = parseFloat(e.target.value);
-    // Linear mapping: 0→1x, 100→10x
-    bodySizeScale = 1 + (sliderValue / 100) * 9;
+    const { minScale, maxScale } = VISUAL_CONFIG.bodySize;
+    bodySizeScale = minScale + (sliderValue / 100) * (maxScale - minScale);
 
     // Update display
     bodySizeValueDisplay.textContent = `${bodySizeScale.toFixed(1)}x`;
@@ -1077,14 +1074,15 @@ document.addEventListener("DOMContentLoaded", () => {
       if (bodyMesh.geometry) {
         bodyMesh.geometry.dispose();
 
+        const seg = VISUAL_CONFIG.geometry.segments;
         const segments =
           bodyMesh.userData.type === "moon"
-            ? 16
+            ? seg.moon
             : bodyMesh.userData.type === "asteroid"
-            ? 8
+            ? seg.asteroid
             : bodyMesh.userData.radius > 20000
-            ? 64
-            : 32;
+            ? seg.planet
+            : seg.smallPlanet;
 
         bodyMesh.geometry = new THREE.SphereGeometry(
           newRadius,
@@ -1711,7 +1709,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function animate() {
-    animationFrameCounter++;
     requestAnimationFrame(animate);
     const deltaTimeSeconds = clock.getDelta();
     if (!renderer || !scene || !camera) return;

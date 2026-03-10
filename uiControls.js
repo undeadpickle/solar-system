@@ -152,7 +152,7 @@ export function togglePause(clock, timeScale, isPaused) {
   const pauseButton = document.getElementById("pauseButton");
   if (pauseButton) {
     pauseButton.textContent = newIsPaused ? "Resume" : "Pause";
-    pauseButton.style.backgroundColor = newIsPaused ? "#28a745" : "#007bff";
+    pauseButton.classList.toggle("btn-paused", newIsPaused);
   }
   if (newIsPaused) clock.stop();
   else {
@@ -163,7 +163,7 @@ export function togglePause(clock, timeScale, isPaused) {
     if (clock) clock.stop();
     if (pauseButton) {
       pauseButton.textContent = "Resume";
-      pauseButton.style.backgroundColor = "#28a745";
+      pauseButton.classList.add("btn-paused");
     }
     return { isPaused: finalIsPaused, timeScale };
   }
@@ -480,37 +480,22 @@ export function handleOpacityChange(
   }
 }
 
-export function handleRoughnessChange(
-  event,
-  settingsTargetObject,
-  roughnessValueDisplay
-) {
-  if (
-    settingsTargetObject &&
-    settingsTargetObject.material &&
-    settingsTargetObject.material.isMeshStandardMaterial
-  ) {
-    const value = parseFloat(event.target.value);
-    settingsTargetObject.material.roughness = value;
-    roughnessValueDisplay.textContent = value.toFixed(2);
-  }
+function createMaterialPropertyHandler(property) {
+  return (event, settingsTargetObject, displayElement) => {
+    if (
+      settingsTargetObject &&
+      settingsTargetObject.material &&
+      settingsTargetObject.material.isMeshStandardMaterial
+    ) {
+      const value = parseFloat(event.target.value);
+      settingsTargetObject.material[property] = value;
+      displayElement.textContent = value.toFixed(2);
+    }
+  };
 }
 
-export function handleMetalnessChange(
-  event,
-  settingsTargetObject,
-  metalnessValueDisplay
-) {
-  if (
-    settingsTargetObject &&
-    settingsTargetObject.material &&
-    settingsTargetObject.material.isMeshStandardMaterial
-  ) {
-    const value = parseFloat(event.target.value);
-    settingsTargetObject.material.metalness = value;
-    metalnessValueDisplay.textContent = value.toFixed(2);
-  }
-}
+export const handleRoughnessChange = createMaterialPropertyHandler("roughness");
+export const handleMetalnessChange = createMaterialPropertyHandler("metalness");
 
 export function handleWireframeToggle(event, settingsTargetObject) {
   if (settingsTargetObject && settingsTargetObject.material) {

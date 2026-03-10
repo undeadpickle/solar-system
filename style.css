@@ -17,6 +17,7 @@
 
   /* Accent — observatory amber */
   --amber: #d4943c;
+  --amber-bright: #e0a44a;
   --amber-dim: #b07a2e;
   --amber-glow: rgba(212, 148, 60, 0.06);
 
@@ -28,6 +29,12 @@
   /* Semantic */
   --caution: #c0503a;
   --caution-hover: #a84030;
+  --caution-text: #e07060;
+  --caution-text-hover: #f08070;
+
+  /* Backgrounds — opaque variants for dropdowns */
+  --bg-dark: #000;
+  --bg-dropdown: #1a1610;
 
   /* Spacing */
   --space-xs: 4px;
@@ -60,7 +67,7 @@
 body {
   margin: 0;
   overflow: hidden;
-  background-color: #000;
+  background-color: var(--bg-dark);
   color: var(--reading);
   font-family: var(--font);
   font-size: var(--text-base);
@@ -140,7 +147,7 @@ canvas {
 }
 
 #infoPanel select option {
-  background: #1a1610;
+  background: var(--bg-dropdown);
   color: var(--reading);
 }
 
@@ -197,13 +204,17 @@ canvas {
   background-color: var(--amber);
 }
 
+#timeControl button.btn-paused {
+  background-color: var(--amber);
+}
+
 #resetViewButton {
-  background-color: rgba(200, 180, 150, 0.12);
+  background-color: var(--edge);
   color: var(--reading-secondary);
 }
 
 #resetViewButton:hover {
-  background-color: rgba(200, 180, 150, 0.2);
+  background-color: var(--edge-strong);
   color: var(--reading);
 }
 
@@ -288,7 +299,7 @@ canvas {
 }
 
 #materialSettingsHeader:hover {
-  color: #e0a44a;
+  color: var(--amber-bright);
 }
 
 .collapse-icon {
@@ -307,6 +318,14 @@ canvas {
 
 #materialSettingsContent.collapsed {
   display: none;
+}
+
+/* --- Section Separators --- */
+
+.section-separator {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 0.5px solid var(--edge);
 }
 
 /* --- Setting Items --- */
@@ -551,7 +570,7 @@ canvas {
 /* --- Buttons --- */
 
 .settings-button {
-  background-color: rgba(200, 180, 150, 0.1);
+  background-color: var(--edge);
   color: var(--reading-secondary);
   border: 0.5px solid var(--edge);
   padding: var(--space-xs) var(--space-sm);
@@ -565,7 +584,7 @@ canvas {
 }
 
 .settings-button:hover {
-  background-color: rgba(200, 180, 150, 0.18);
+  background-color: var(--edge-strong);
   color: var(--reading);
 }
 
@@ -574,13 +593,13 @@ canvas {
   width: 100%;
   margin-top: var(--space-lg);
   background-color: rgba(192, 80, 58, 0.15);
-  color: #e07060;
+  color: var(--caution-text);
   border-color: rgba(192, 80, 58, 0.25);
 }
 
 #resetAllObjectSettingsButton:hover {
   background-color: rgba(192, 80, 58, 0.25);
-  color: #f08070;
+  color: var(--caution-text-hover);
 }
 
 /* --- Music Controls --- */
