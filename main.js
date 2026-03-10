@@ -48,6 +48,8 @@ import {
   handleTimeScaleChange as uiHandleTimeScaleChange,
 } from "./uiControls.js";
 
+import { CosmicVoyage } from "./cosmicVoyage.js";
+
 import {
   createOrbitPathLine,
   updateCelestialBody,
@@ -147,6 +149,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let backgroundMusic = null;
   let musicEnabled = false;
   let musicMuted = false;
+
+  // Cosmic Voyage
+  let voyage = null;
 
   // Celestial body scaling system
   let bodySizeScale = 5.0; // Current global scale multiplier
@@ -388,9 +393,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       setupWindowResize(updateBloomSystemSize);
       renderer.domElement.removeEventListener("click", onCanvasClick);
-      renderer.domElement.addEventListener("click", (e) =>
-        onCanvasClick(e, setFocus)
-      );
+      renderer.domElement.addEventListener("click", (e) => {
+        if (voyage && voyage.isActive) return; // Don't hijack camera during voyage
+        onCanvasClick(e, setFocus);
+      });
       document
         .getElementById("timeScaleInput")
         .addEventListener("input", handleTimeScaleChange);
@@ -421,6 +427,56 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Error during initialization: " + e.message);
     }
   }
+
+  // --- Cosmic Voyage ---
+  voyage = new CosmicVoyage({
+    camera,
+    orbitControls,
+    objectLookup,
+    getTimeScale: () => timeScale,
+    setTimeScale: (ts) => { timeScale = ts; },
+    setFollowedObject: (obj) => { followedObject = obj; },
+    setFocus: (mesh) => setFocus(mesh),
+  });
+
+  // Launch button
+  const voyageBtn = document.getElementById("cosmicVoyageButton");
+  if (voyageBtn) {
+    voyageBtn.addEventListener("click", () => voyage.start());
+  }
+
+  // Voyage control buttons
+  const voyagePrev = document.getElementById("voyagePrev");
+  const voyageNext = document.getElementById("voyageNext");
+  const voyagePauseResume = document.getElementById("voyagePauseResume");
+  const voyageExit = document.getElementById("voyageExit");
+  if (voyagePrev) voyagePrev.addEventListener("click", () => voyage.skipToPrevious());
+  if (voyageNext) voyageNext.addEventListener("click", () => voyage.skipToNext());
+  if (voyagePauseResume) voyagePauseResume.addEventListener("click", () => voyage.togglePause());
+  if (voyageExit) voyageExit.addEventListener("click", () => voyage.stop());
+
+  // Keyboard shortcuts during voyage
+  document.addEventListener("keydown", (e) => {
+    if (!voyage.isActive) return;
+    switch (e.code) {
+      case "Space":
+        e.preventDefault();
+        voyage.togglePause();
+        break;
+      case "ArrowRight":
+        e.preventDefault();
+        voyage.skipToNext();
+        break;
+      case "ArrowLeft":
+        e.preventDefault();
+        voyage.skipToPrevious();
+        break;
+      case "Escape":
+        e.preventDefault();
+        voyage.stop();
+        break;
+    }
+  });
 
   /**
    * Creates a lens flare system for the Sun
@@ -1747,6 +1803,11 @@ document.addEventListener("DOMContentLoaded", () => {
       objectToTrack.getWorldPosition(targetPosition);
       orbitControls.target.copy(targetPosition);
     }
+    // Cosmic Voyage camera control (after followedObject, before orbitControls.update)
+    if (voyage && voyage.isActive) {
+      voyage.update(deltaTimeSeconds);
+    }
+
     if (orbitControls) orbitControls.update();
 
     // Use bloom composer if available and enabled, otherwise direct render
