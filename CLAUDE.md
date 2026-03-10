@@ -20,7 +20,7 @@ Single-page app with modular JS files. No framework, no build step — just open
 
 - `solarsystem.html` — Entry point, UI markup, CDN script tags
 - `main.js` (~2000 lines) — Core simulation loop, planet/moon creation, animation, post-processing
-- `celestialBodyData.js` (~980 lines) — Orbital parameters, planet data, ring system configs, asteroid belt generation
+- `celestialBodyData.js` (~1030 lines) — Orbital parameters, planet data, ring system configs, asteroid belt generation, visual tuning config (`VISUAL_CONFIG`)
 - `threeSetup.js` (~270 lines) — Three.js scene, camera, renderer, controls initialization
 - `uiControls.js` (~540 lines) — UI event handlers, settings panel logic
 - `physics.js` (~370 lines) — Keplerian orbital mechanics calculations
@@ -59,6 +59,7 @@ Just edit files and refresh the browser.
 - Collapsible settings panel sections with `+`/`-` toggle pattern
 - CSS uses custom property token system (`--amber`, `--glass`, `--reading`, `--edge`, etc.) — observatory amber theme
 - Spacing uses 4/8/12/16/24px scale via `--space-*` tokens
+- `VISUAL_CONFIG` in `celestialBodyData.js` centralizes magic numbers for bloom, lighting, geometry segments, camera, and audio — add new visual params there, not inline
 
 ## Gotchas
 
@@ -67,7 +68,8 @@ Just edit files and refresh the browser.
 - `main.js` is large (~2000 lines) — read targeted sections, not the whole file
 - Moon orbits use parent planet's equatorial plane, not ecliptic (intentional scientific accuracy fix)
 - Texture loading has fallback system — check `RING_SYSTEMS` config in `celestialBodyData.js` for ring texture paths
-- Some HTML elements have inline styles using CSS custom properties — check `solarsystem.html` when changing token names
+- All colors must use CSS custom property tokens — hardcoded hex/rgba outside `:root` is a bug (see `docs/lessons.md`)
 
 ## Current Focus
 
+Refactor Phases 0-2 complete (cleanup, physics dedup, config consolidation). Phases 3-5 pending: split `createCelestialBody` into builders, split `setFocus`, optimize size slider. See `docs/refactor-plan.md` for full plan.
