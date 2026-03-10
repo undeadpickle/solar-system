@@ -24,6 +24,8 @@ Single-page app with modular JS files. No framework, no build step — just open
 - `threeSetup.js` (~270 lines) — Three.js scene, camera, renderer, controls initialization
 - `uiControls.js` (~540 lines) — UI event handlers, settings panel logic
 - `physics.js` (~370 lines) — Keplerian orbital mechanics calculations
+- `cosmicVoyage.js` (~400 lines) — Cosmic Voyage state machine, camera choreography, overlay management
+- `cosmicVoyageData.js` (~200 lines) — Journey stop definitions (Sun to Neptune) and timing config
 - `style.css` — UI panel styling (observatory amber token system)
 
 ### Key Directories
@@ -72,4 +74,4 @@ Just edit files and refresh the browser.
 
 ## Current Focus
 
-Refactor Phases 0-2 complete (cleanup, physics dedup, config consolidation). Phases 3-5 pending: split `createCelestialBody` into builders, split `setFocus`, optimize size slider. See `docs/session-handoff.md` for details.
+Cosmic Voyage feature complete on `feat/cosmic-voyage` branch — cinematic guided journey from Sun to Neptune. Refactor Phases 3-5 still pending: split `createCelestialBody` into builders, split `setFocus`, optimize size slider. See `docs/session-handoff.md` for details.

@@ -187,6 +187,38 @@
           </button>
           <button id="muteButton" class="settings-button" disabled>Mute</button>
         </div>
+        <div class="section-separator">
+          <button id="cosmicVoyageButton" class="voyage-launch-btn">Cosmic Voyage</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cosmic Voyage Overlay -->
+    <div id="voyageOverlay" class="voyage-overlay" style="display: none;">
+      <div id="voyageTravelInfo" class="voyage-travel-info">
+        <span class="voyage-travel-label">Traveling at the speed of light</span>
+        <span id="voyageLightTime" class="voyage-light-time"></span>
+      </div>
+
+      <div id="voyagePlanetReveal" class="voyage-planet-reveal">
+        <h1 id="voyagePlanetName" class="voyage-planet-name"></h1>
+        <p id="voyagePlanetSubtitle" class="voyage-subtitle"></p>
+        <p id="voyagePlanetFact" class="voyage-fact"></p>
+        <p id="voyageScaleComparison" class="voyage-scale"></p>
+      </div>
+
+      <div id="voyageProgress" class="voyage-progress">
+        <div class="voyage-progress-track">
+          <div id="voyageProgressFill" class="voyage-progress-fill"></div>
+        </div>
+        <div id="voyageProgressStops" class="voyage-progress-stops"></div>
+      </div>
+
+      <div id="voyageControls" class="voyage-controls">
+        <button id="voyagePrev" class="voyage-ctrl-btn" title="Previous stop">&#9664;&#9664;</button>
+        <button id="voyagePauseResume" class="voyage-ctrl-btn" title="Pause / Resume">&#10074;&#10074;</button>
+        <button id="voyageNext" class="voyage-ctrl-btn" title="Next stop">&#9654;&#9654;</button>
+        <button id="voyageExit" class="voyage-ctrl-btn voyage-exit-btn" title="Exit voyage">Exit</button>
       </div>
     </div>
 

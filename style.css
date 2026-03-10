@@ -614,3 +614,228 @@ canvas {
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* ===================================
+   Cosmic Voyage
+   =================================== */
+
+/* Launch button */
+.voyage-launch-btn {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, var(--amber-dim), var(--amber));
+  color: var(--glass);
+  border: 1px solid var(--amber);
+  border-radius: var(--radius);
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voyage-launch-btn:hover {
+  background: linear-gradient(135deg, var(--amber), var(--amber-bright));
+  box-shadow: 0 0 12px rgba(212, 148, 60, 0.3);
+}
+
+/* Hide regular panels during voyage */
+body.voyage-active .panel {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* Overlay container */
+.voyage-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  font-family: "Inter", sans-serif;
+}
+
+/* Travel info — top center */
+.voyage-travel-info {
+  position: absolute;
+  top: 12%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  opacity: 0;
+  transition: opacity var(--voyage-fade, 0.8s) ease;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.voyage-travel-label {
+  font-size: 0.85rem;
+  color: var(--reading-secondary);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.voyage-light-time {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: var(--amber-bright);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* Planet reveal — centered */
+.voyage-planet-reveal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.voyage-planet-name {
+  font-size: 3.5rem;
+  font-weight: 200;
+  color: var(--amber);
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--space-xs) 0;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.voyage-subtitle {
+  font-size: 1.1rem;
+  color: var(--reading-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 var(--space-lg) 0;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.8);
+}
+
+.voyage-fact {
+  font-size: 1rem;
+  color: var(--reading);
+  max-width: 500px;
+  margin: 0 auto var(--space-md) auto;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.voyage-scale {
+  font-size: 0.9rem;
+  color: var(--reading-muted);
+  font-style: italic;
+  max-width: 450px;
+  margin: 0 auto;
+  line-height: 1.4;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* Visible state — toggled by JS */
+.voyage-visible {
+  opacity: 1 !important;
+}
+
+/* Progress bar — bottom center */
+.voyage-progress {
+  position: absolute;
+  bottom: var(--space-xl);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(500px, 70vw);
+}
+
+.voyage-progress-track {
+  height: 2px;
+  background: var(--edge);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.voyage-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--amber);
+  transition: width 0.6s ease;
+}
+
+.voyage-progress-stops {
+  position: relative;
+  height: 16px;
+  margin-top: -9px;
+}
+
+.voyage-stop-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--edge-strong);
+  border: 1px solid var(--reading-faint);
+  transform: translateX(-50%);
+  transition: all 0.3s ease;
+}
+
+.voyage-stop-dot.voyage-stop-active {
+  background: var(--amber);
+  border-color: var(--amber-bright);
+  box-shadow: 0 0 6px rgba(212, 148, 60, 0.4);
+  width: 10px;
+  height: 10px;
+  margin-top: -1px;
+}
+
+.voyage-stop-dot.voyage-stop-visited {
+  background: var(--amber-dim);
+  border-color: var(--amber);
+}
+
+/* Controls — bottom right */
+.voyage-controls {
+  position: absolute;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  display: flex;
+  gap: var(--space-sm);
+  pointer-events: all;
+}
+
+.voyage-ctrl-btn {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--glass);
+  color: var(--reading);
+  border: 1px solid var(--edge);
+  border-radius: var(--radius);
+  font-family: "Inter", sans-serif;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.voyage-ctrl-btn:hover {
+  background: var(--glass-elevated);
+  border-color: var(--amber-dim);
+  color: var(--amber);
+}
+
+.voyage-exit-btn {
+  color: var(--caution-text);
+  border-color: var(--edge);
+}
+
+.voyage-exit-btn:hover {
+  border-color: var(--caution);
+  color: var(--caution-text-hover);
+}
