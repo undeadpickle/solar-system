@@ -2,66 +2,31 @@
 
 ## Before Starting Development
 
-- [ ] Run `giga_autorun` to read current project state
-- [ ] Review memory.md for current status
-- [ ] Review to-do-list.md for next priorities
-- [ ] **REQUIRED**: Ensure Cursor IDE with Live Server extension is set up
-- [ ] **REQUIRED**: Test that http://127.0.0.1:5500/solarsystem.html loads correctly
+- [ ] Read `CLAUDE.md` for project conventions and current focus
+- [ ] Read `docs/session-handoff.md` for previous session context
+- [ ] Read `docs/lessons.md` for project-specific patterns
+- [ ] Check git status for uncommitted changes or stashes
 
 ## During Development
 
-- [ ] Always test changes via Live Server (not file:// protocol)
-- [ ] Verify ES6 module imports work correctly
-- [ ] Test new features at http://127.0.0.1:5500/solarsystem.html
-- [ ] Check browser console for any errors
+- [ ] Serve locally (`npx serve .`) — ES6 modules require HTTP server, not file://
+- [ ] Test changes in browser, check console for errors
+- [ ] Follow conventions in CLAUDE.md (tokens, VISUAL_CONFIG, etc.)
 
 ## After Completing Any Task
 
-- [ ] **REQUIRED**: Test implementation on Live Server before marking complete
-- [ ] Update `docs/to-do-list.md`:
-  - [ ] Mark completed items as [x]
-  - [ ] Add any new tasks discovered
-- [ ] Update `.giga/memory/memory.md`:
-  - [ ] Update "Current Development Status"
-  - [ ] Update architecture/technical details if changed
-  - [ ] Update preferences if workflow changed
+- [ ] Test implementation in browser before marking complete
+- [ ] Update `docs/to-do-list.md` — mark completed items, add new tasks discovered
+- [ ] If lessons were learned, update `docs/lessons.md`
 
-## Major Milestone Completion
+## Session End
 
-- [ ] **REQUIRED**: Full testing on Live Server
-- [ ] Update project overview in memory.md
-- [ ] Review and update all technical details
-- [ ] Update deployment/structure information
-- [ ] Consider if new sections needed in either file
+- [ ] Update `docs/session-handoff.md` with what was done and what's next
+- [ ] Check if `CLAUDE.md` needs updates (new conventions, stale info)
+- [ ] Commit with conventional commit format
 
-## Development Environment Requirements
+## Development Environment
 
-### Critical Setup
-
-- **IDE**: Cursor with Live Server extension installed
-- **Testing URL**: http://127.0.0.1:5500/solarsystem.html
-- **Why Required**: ES6 modules need HTTP server due to CORS restrictions
-
-### Testing Standards
-
-- Never test with file:// protocol (will break ES6 modules)
-- Always verify Live Server is running before testing
-- Check browser console for module loading errors
-- Test all interactive features (scaling, audio, visual effects)
-
-## File-Specific Reminders
-
-### Memory.md Updates When:
-
-- Project structure changes (files added/removed/reorganized)
-- Technology stack changes
-- Development priorities shift
-- Architecture decisions made
-- **New**: Development environment or testing requirements change
-
-### To-Do-List.md Updates When:
-
-- Tasks completed
-- New requirements discovered
-- Priorities reordered
-- Scope changes
+- **IDE**: VS Code with Claude Code extension
+- **Server**: `npx serve .` or `python3 -m http.server`
+- **Why HTTP required**: ES6 module imports fail under file:// protocol due to CORS

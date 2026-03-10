@@ -59,41 +59,20 @@ An interactive 3D Solar System simulation built with Three.js that provides an e
    cd solar-system
    ```
 
-2. **Set up local development server**
+2. **Start a local development server**
 
-   **⚠️ Important: Live Server Required for ES6 Modules**
-
-   This project uses ES6 modules which require an HTTP server (not file:// protocol) due to CORS restrictions.
-
-   **Option A: Cursor Live Server (Recommended for Development)**
-
-   - Install the "Live Server" extension in Cursor IDE
-   - Right-click on `solarsystem.html` and select "Open with Live Server"
-   - Navigate to `http://127.0.0.1:5500/solarsystem.html`
-
-   **Option B: VS Code Live Server**
-
-   - Install the "Live Server" extension in VS Code
-   - Right-click on `solarsystem.html` and select "Open with Live Server"
-
-   **Option C: Python HTTP Server**
+   **⚠️ Important:** ES6 modules require an HTTP server — `file://` won't work due to CORS restrictions.
 
    ```bash
-   # Python 3
-   python -m http.server 5500
+   # Option A: Node.js (recommended)
+   npx serve .
 
-   # Python 2
-   python -m SimpleHTTPServer 5500
-   ```
-
-   **Option D: Node.js HTTP Server**
-
-   ```bash
-   npx http-server . -p 5500
+   # Option B: Python
+   python3 -m http.server 8000
    ```
 
 3. **Open in browser**
-   - Navigate to `http://127.0.0.1:5500/solarsystem.html` (Live Server default) or the port shown by your server
+   - Navigate to `http://localhost:<port>/solarsystem.html` (check terminal for the port)
 
 ### Quick Start
 
@@ -137,12 +116,12 @@ solar-system/
 ├── uiControls.js             # UI event handlers and controls
 ├── physics.js                # Orbital mechanics and physics
 ├── celestialBodyData.js      # Celestial body data and constants
-├── docs/                     # Documentation and planning
-│   └── to-do-list.md         # Feature roadmap and progress
-├── .giga/                    # Project management
-│   └── memory/
-│       └── memory.md         # Project memory and status
-└── screenshots/              # Project screenshots
+├── docs/                     # Documentation, planning, lessons learned
+│   ├── to-do-list.md         # Feature roadmap and progress
+│   ├── lessons.md            # Project-specific patterns and corrections
+│   └── session-handoff.md    # Session context for continuity
+├── images/                   # Planet textures, ring textures, starfield
+└── audio/                    # Background music
 ```
 
 ## 🔧 Technical Details
@@ -150,8 +129,8 @@ solar-system/
 - **Frontend**: HTML5, CSS3, JavaScript (ES6+)
 - **3D Graphics**: Three.js (r128)
 - **Architecture**: Modular ES6 structure with separated concerns
-- **Development**: Cursor IDE with Live Server extension (required for ES6 modules)
-- **Testing**: http://127.0.0.1:5500/solarsystem.html
+- **Development**: VS Code with Claude Code; any local HTTP server (`npx serve .`)
+- **Testing**: `http://localhost:<port>/solarsystem.html`
 - **Performance**: Optimized for desktop browsers
 
 ## 🎯 Educational Goals

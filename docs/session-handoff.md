@@ -5,7 +5,7 @@
 
 ## What Got Done
 
-- **Deep refactor analysis:** 3 parallel subagents analyzed all JS modules, HTML, CSS, and docs. Full findings in `docs/refactor-plan.md`
+- **Deep refactor analysis:** 3 parallel subagents analyzed all JS modules, HTML, CSS, and docs
 - **Pre-mortem review:** Identified risks in the plan (closure state in createCelestialBody, slider debounce nuance, accessibility scope creep). Adjusted execution order accordingly.
 
 ### Phase 0 — Quick Wins
@@ -39,7 +39,6 @@
 - `style.css` — 5 new tokens, replaced 9 hardcoded values, added `.section-separator` and `.btn-paused`
 - `solarsystem.html` — replaced 3 inline style blocks with `.section-separator` class
 - `docs/lessons.md` — first lessons captured
-- `docs/refactor-plan.md` — full refactor plan with findings, quick wins, ticket seeds
 
 ## What's Next
 
@@ -69,4 +68,4 @@
 - Playwright baseline screenshot at `screenshots/baseline-before-refactor.png`
 - Phase screenshots at `screenshots/after-phase{0,1,2}-*.png`
 - CLAUDE.md needs minor updates (inline styles gotcha is now stale, VISUAL_CONFIG should be documented) — suggested changes were presented but not applied, pending user approval
-- `docs/refactor-plan.md` has the full findings table and ticket seeds for remaining work
+- Remaining ticket seeds and findings are documented in the session handoff "What's Next" section above

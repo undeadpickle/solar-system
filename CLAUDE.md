@@ -72,4 +72,4 @@ Just edit files and refresh the browser.
 
 ## Current Focus
 
-Refactor Phases 0-2 complete (cleanup, physics dedup, config consolidation). Phases 3-5 pending: split `createCelestialBody` into builders, split `setFocus`, optimize size slider. See `docs/refactor-plan.md` for full plan.
+Refactor Phases 0-2 complete (cleanup, physics dedup, config consolidation). Phases 3-5 pending: split `createCelestialBody` into builders, split `setFocus`, optimize size slider. See `docs/session-handoff.md` for details.

@@ -2,8 +2,7 @@
 
 **🚀 Development Setup:**
 
-- **REQUIRED**: Use Cursor IDE with Live Server extension for testing
-- **Testing URL**: http://127.0.0.1:5500/solarsystem.html
+- **REQUIRED**: Use a local HTTP server (`npx serve .` or `python3 -m http.server`)
 - **Why**: ES6 modules require HTTP server due to CORS restrictions (not file:// protocol)
 
 **Legend:**
